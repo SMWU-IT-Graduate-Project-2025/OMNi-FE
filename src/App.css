@@ -1,0 +1,251 @@
+/* 전체 앱 스타일 */
+.app {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 배경 */
+.background {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: white;
+}
+
+/* 대각선 배경 */
+.diagonal-background {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 70%;
+  height: 70%;
+  background: linear-gradient(135deg, #D8BFD8 0%, #E6E6FA 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 30% 100%);
+  z-index: 1;
+}
+
+/* 카메라 그래픽 */
+.camera-graphic {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  z-index: 10;
+}
+
+.camera-body {
+  width: 120px;
+  height: 80px;
+  background: #6A5ACD;
+  border-radius: 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-lens {
+  width: 40px;
+  height: 40px;
+  background: #4B0082;
+  border-radius: 50%;
+  position: relative;
+}
+
+.camera-lens::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background: #2E0854;
+  border-radius: 50%;
+}
+
+.camera-mount {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 20px;
+  background: #6A5ACD;
+  border-radius: 10px;
+}
+
+.light-beam {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: 200px;
+  height: 60px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.1) 100%);
+  clip-path: polygon(0 0, 100% 20%, 100% 80%, 0 100%);
+  z-index: 2;
+}
+
+/* 메인 콘텐츠 */
+.content {
+  position: absolute;
+  top: 50%;
+  right: 10%;
+  transform: translateY(-50%);
+  z-index: 5;
+  text-align: center;
+}
+
+/* 환영 텍스트 */
+.welcome-text {
+  margin-bottom: 40px;
+}
+
+.welcome-text h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #6A5ACD;
+  margin: 0;
+  transform: skew(-5deg);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.underline {
+  width: 60px;
+  height: 3px;
+  background: #FF6B6B;
+  margin: 10px auto 0;
+  border-radius: 2px;
+  animation: wave 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(1.2); }
+}
+
+/* 폼 컨테이너 */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+/* 입력 그룹 */
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* 입력 필드 */
+.input-field {
+  flex: 1;
+  padding: 15px 20px;
+  border: 2px solid #E0E0E0;
+  border-radius: 25px;
+  font-size: 16px;
+  background: white;
+  color: #333;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.input-field::placeholder {
+  color: #999;
+  text-align: center;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #6A5ACD;
+  box-shadow: 0 0 10px rgba(106, 90, 205, 0.3);
+}
+
+/* 상태 아이콘 */
+.status-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.status-icon.valid {
+  background: #90EE90;
+  color: #228B22;
+}
+
+.status-icon.pending {
+  background: #FFB6C1;
+  color: #DC143C;
+}
+
+/* 연결 버튼 */
+.connect-button {
+  margin-top: 20px;
+  padding: 15px 40px;
+  background: #6A5ACD;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(106, 90, 205, 0.3);
+}
+
+.connect-button:hover {
+  background: #5A4ACD;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(106, 90, 205, 0.4);
+}
+
+.connect-button:active {
+  transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .camera-graphic {
+    top: 20px;
+    left: 20px;
+  }
+  
+  .camera-body {
+    width: 80px;
+    height: 60px;
+  }
+  
+  .camera-lens {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .light-beam {
+    width: 150px;
+    height: 40px;
+  }
+  
+  .content {
+    right: 5%;
+    top: 60%;
+  }
+  
+  .welcome-text h1 {
+    font-size: 2rem;
+  }
+  
+  .input-group {
+    max-width: 300px;
+  }
+} 
