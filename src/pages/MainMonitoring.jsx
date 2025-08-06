@@ -1,22 +1,16 @@
 import React from "react";
 import "./MainMonitoring.css";
+import Header from "../components/Header";
 
 const MainMonitoring = ({ storeName }) => {
   return (
     <div className="main-root">
-      <header className="main-header">
-        <nav className="main-nav">
-          <span>Monitoring</span>
-          <span>Alert History</span>
-          <span>Event DB</span>
-          <span>Camera Setting</span>
-        </nav>
-      </header>
+      <Header />
       <div className="main-content-area">
         <div className="main-content-left">
-          <div className="main-store-name">
+          {/* <div className="main-store-name">
             <b>OMNi : for <span className="main-store-name-input">{storeName || "SMIT"} </span></b>
-          </div>
+          </div> */}
           <section className="main-section live-monitoring-section">
             <div className="main-section-header">
               <span className="main-section-icon">📷</span>
