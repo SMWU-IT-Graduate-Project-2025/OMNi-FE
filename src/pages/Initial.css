@@ -356,6 +356,7 @@
   flex-direction: column;
   align-items: center;
   min-width: 340px;
+  width: 340px;
 }
 
 .initial-title {
@@ -368,6 +369,7 @@
 
 .initial-input {
   width: 100%;
+  box-sizing: border-box;
   padding: 14px 16px;
   margin-bottom: 18px;
   border: 1px solid #d1d5db;
@@ -383,7 +385,6 @@
 }
 
 .initial-connect-btn {
-  width: 100%;
   padding: 14px 0;
   background: #7180CB;
   color: #fff;
@@ -393,9 +394,25 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s;
-  margin-top: 8px;
 }
 .initial-connect-btn:hover {
   background: #5b61a3;
+}
+
+.initial-btn-group {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.initial-btn-group .initial-connect-btn:first-child {
+  flex: 1.4;
+}
+.initial-btn-group .initial-connect-btn:last-child {
+  flex: 1;
+  background: #b2b4bb;
 }
   

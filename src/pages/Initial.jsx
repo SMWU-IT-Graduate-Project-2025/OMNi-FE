@@ -25,12 +25,20 @@ const Initial = ({ onConnect }) => {
             value={eventQuery}
             onChange={e => setEventQuery(e.target.value)}
           />
-          <button
-            className="initial-connect-btn"
-            onClick={() => onConnect && onConnect(storeName, eventQuery)}
-          >
-            Connect a Camera
-          </button>
+          <div className="initial-btn-group">
+            <button
+              className="initial-connect-btn"
+              onClick={() => onConnect && onConnect(storeName, eventQuery, 'webcam')}
+            >
+              connect webcam
+            </button>
+            <button
+              className="initial-connect-btn"
+              onClick={() => onConnect && onConnect(storeName, eventQuery, 'mobile')}
+            >
+              mobile cam
+            </button>
+          </div>
         </div>
       </div>
     </div>
