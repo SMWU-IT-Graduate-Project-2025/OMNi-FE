@@ -2,10 +2,10 @@ import React from "react";
 import "./MainMonitoring.css";
 import Header from "../components/Header";
 
-const MainMonitoring = ({ storeName }) => {
+const MainMonitoring = ({ storeName, onPageChange }) => {
   return (
     <div className="main-root">
-      <Header />
+      <Header onPageChange={onPageChange} />
       <div className="main-content-area">
         <div className="main-content-left">
           {/* <div className="main-store-name">

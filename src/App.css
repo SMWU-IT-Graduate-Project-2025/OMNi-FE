@@ -4,6 +4,7 @@
   height: 100vh;
   overflow: hidden;
   position: relative;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 /* 배경 */
@@ -12,6 +13,7 @@
   height: 100%;
   position: relative;
   background: white;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 /* 대각선 배경 */
@@ -95,11 +97,13 @@
   transform: translateY(-50%);
   z-index: 5;
   text-align: center;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 /* 환영 텍스트 */
 .welcome-text {
   margin-bottom: 40px;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 .welcome-text h1 {
@@ -109,6 +113,7 @@
   margin: 0;
   transform: skew(-5deg);
   text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 .underline {
@@ -131,6 +136,7 @@
   flex-direction: column;
   gap: 20px;
   align-items: center;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 /* 입력 그룹 */
@@ -140,6 +146,7 @@
   gap: 15px;
   width: 100%;
   max-width: 400px;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 /* 입력 필드 */
@@ -153,11 +160,13 @@
   color: #333;
   transition: all 0.3s ease;
   text-align: center;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 .input-field::placeholder {
   color: #999;
   text-align: center;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 .input-field:focus {
@@ -177,6 +186,7 @@
   font-weight: bold;
   font-size: 16px;
   transition: all 0.3s ease;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 .status-icon.valid {
@@ -202,6 +212,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(106, 90, 205, 0.3);
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
 .connect-button:hover {

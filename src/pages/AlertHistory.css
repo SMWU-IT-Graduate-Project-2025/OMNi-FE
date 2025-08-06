@@ -1,0 +1,174 @@
+.alert-history-root {
+  min-height: 100vh;
+  background-color: #f1f1f1;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-history-content {
+  flex: 1;
+  padding: 0 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.alert-header-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.alert-header-text {
+  display: flex;
+  min-width: 288px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alert-main-title {
+  color: #cf6451;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  padding-top: 10px;
+  margin: 0;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.alert-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.alert-section-title {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  padding: 0 16px 8px 16px;
+  padding-top: 16px;
+  margin: 0;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.alert-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-item-container {
+  padding: 16px;
+}
+
+.alert-item-content {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.alert-text-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 2 2 0px;
+}
+
+.alert-time {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.alert-type {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.alert-description {
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.alert-image {
+  width: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  flex: 1;
+  min-height: 120px;
+  background-color: #f3f4f6;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .alert-history-content {
+    padding: 0 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .alert-history-content {
+    padding: 0 40px;
+  }
+  
+  .alert-header-text {
+    min-width: auto;
+  }
+  
+  .alert-main-title {
+    font-size: 28px;
+  }
+  
+  .alert-item-content {
+    flex-direction: column;
+  }
+  
+  .alert-image {
+    min-height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .alert-history-content {
+    padding: 0 20px;
+  }
+  
+  .alert-main-title {
+    font-size: 24px;
+  }
+  
+  .alert-section-title {
+    font-size: 16px;
+  }
+} 
