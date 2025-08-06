@@ -50,7 +50,7 @@
 
 .header-nav-item:hover {
   background-color: transparent;
-  color: #333;
+  color: #646aaf;
 }
 
 .header-nav-item:hover::after {

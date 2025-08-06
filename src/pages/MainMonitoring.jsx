@@ -21,17 +21,6 @@ const MainMonitoring = ({ storeName, onPageChange }) => {
               <span className="main-live-video-text">📷 실시간 영상 스트림</span>
             </div>
           </section>
-          <section className="main-section event-clip-section">
-            <div className="main-section-header">
-              <span className="main-section-icon">⏲️</span>
-              <span className="main-section-title">Event Clip Archive</span>
-            </div>
-            <div className="main-clip-list">
-              <div className="main-clip-item">📁 Clip 1</div>
-              <div className="main-clip-item">📁 Clip 2</div>
-              <div className="main-clip-item">📁 Clip 3</div>
-            </div>
-          </section>
         </div>
         <aside className="main-content-right">
           <div className="main-section-header">
@@ -44,6 +33,22 @@ const MainMonitoring = ({ storeName, onPageChange }) => {
             <div className="main-alert-item">[10:55:42] 이상행동 감지 - 다툼</div>
           </div>
         </aside>
+      </div>
+      <div className="main-clip-section">
+        <section className="main-section event-clip-section">
+          <div className="main-section-header">
+            <span className="main-section-icon">⏲️</span>
+            <span className="main-section-title">Event Clip Archive</span>
+          </div>
+          <div className="main-clip-list">
+            <div className="main-clip-item">📁 Clip 1</div>
+            <div className="main-clip-item">📁 Clip 2</div>
+            <div className="main-clip-item">📁 Clip 3</div>
+            <div className="main-clip-item">📁 Clip 4</div>
+            <div className="main-clip-item">📁 Clip 5</div>
+            <div className="main-clip-item">📁 Clip 6</div>
+          </div>
+        </section>
       </div>
     </div>
   );

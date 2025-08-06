@@ -40,8 +40,14 @@
 .main-content-area {
   display: flex;
   flex-direction: row;
-  gap: 24px;
+  gap: 40px;
   padding: 32px 32px 0 32px;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+  align-items: stretch;
+}
+
+.main-clip-section {
+  padding:  32px 32px 32px;
   font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
@@ -50,6 +56,9 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  max-width: 1200px;
+  min-width: 800px;
+  height: 100%;
   font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 
@@ -58,10 +67,11 @@
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  padding: 24px 24px 16px 24px;
-  height: fit-content;
-  min-width: 320px;
+  padding: 24px 24px 24px 24px;
+  min-width: 400px;
   font-family: "Space Grotesk", "Noto Sans", sans-serif;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-store-name {
@@ -126,7 +136,7 @@
   background: #111;
   color: #fff;
   border-radius: 18px;
-  height: 280px;
+  aspect-ratio: 16/9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,13 +153,14 @@
 }
 
 .event-clip-section {
-  margin-top: 18px;
+  margin-top: 0;
 }
 
 .main-clip-list {
   display: flex;
   gap: 16px;
   margin-top: 12px;
+  width: 100%;
 }
 
 .main-clip-item {
@@ -162,10 +173,15 @@
   font-size: 1.1rem;
   font-weight: 500;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .main-alert-list {
   margin-top: 12px;
+  width: 500px;
 }
 
 .main-alert-item {
