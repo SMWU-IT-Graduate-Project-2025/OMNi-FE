@@ -1,0 +1,242 @@
+.event-db-root {
+  min-height: 100vh;
+  background-color: #f1f1f1;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-db-content {
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.event-db-section {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  padding: 24px;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  color: #7180CB;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+  /* background-color: #2c5aa0; */
+  /* padding: 12px 16px; */
+  display: inline-block;
+}
+
+/* New Event Registration Section */
+.new-event-section {
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0;
+}
+
+.new-event-form {
+  width: 100%;
+}
+
+.input-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.event-description-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  background: #f9fafb;
+  transition: border 0.2s;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.event-description-input:focus {
+  border: 1.5px solid #2c5aa0;
+  background: #fff;
+}
+
+.event-description-input::placeholder {
+  color: #9ca3af;
+}
+
+.submit-button {
+  padding: 12px 24px;
+  background: #7180CB;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+  white-space: nowrap;
+}
+
+.submit-button:hover {
+  background: #5b61a3;
+}
+
+/* Main Content Area */
+.event-db-main-content {
+  display: flex;
+  gap: 32px;
+  align-items: stretch;
+}
+
+.existing-events-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.existing-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-item {
+  background: #f1f1f1;
+  color: #666;
+  padding: 16px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.event-item:hover {
+  background: #7180CB;
+  color: white
+}
+
+.event-name {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+/* Statistics Section */
+.statistics-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.statistics-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 300px;
+}
+
+.pie-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.pie-chart {
+  width: 200px;
+  height: 200px;
+}
+
+.pie-chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.legend-text {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .event-db-content {
+    padding: 24px;
+  }
+  
+  .event-db-main-content {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .event-db-content {
+    padding: 16px;
+  }
+  
+  .event-db-main-content {
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .submit-button {
+    width: 100%;
+  }
+  
+  .pie-chart {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-db-content {
+    padding: 12px;
+  }
+  
+  .section-title {
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+  
+  .event-name {
+    font-size: 14px;
+  }
+} 
