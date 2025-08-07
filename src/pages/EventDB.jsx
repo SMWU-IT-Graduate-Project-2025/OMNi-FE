@@ -1,6 +1,23 @@
 import React, { useState } from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import "./EventDB.css";
 import Header from "../components/Header";
+
+const COLORS = [
+  "#e9c46a",
+  "#FC806A", 
+  "#4a90a0",
+  "#8fbb8f",
+  "#6ab8a0",
+  "#7ab8d7"
+];
 
 const EventDB = ({ onPageChange }) => {
   const [newEventDescription, setNewEventDescription] = useState("");
@@ -14,9 +31,10 @@ const EventDB = ({ onPageChange }) => {
   ]);
 
   const [eventStatistics] = useState([
-    { name: "쓰러짐", frequency: 35, color: "#2c5aa0" },
-    { name: "절도", frequency: 25, color: "#3a7ca5" },
-    { name: "흡연", frequency: 40, color: "#4a90a0" }
+    { name: "쓰러짐", value: 25 },
+    { name: "절도", value: 27 },
+    { name: "흡연", value: 40 },
+    { name: "유기", value: 8}
   ]);
 
   const handleNewEventSubmit = (e) => {
@@ -25,65 +43,6 @@ const EventDB = ({ onPageChange }) => {
       console.log("New event registered:", newEventDescription);
       setNewEventDescription("");
     }
-  };
-
-  const renderPieChart = () => {
-    const total = eventStatistics.reduce((sum, stat) => sum + stat.frequency, 0);
-    let currentAngle = 0;
-
-    return (
-      <div className="pie-chart-container">
-        <svg className="pie-chart" viewBox="0 0 200 200">
-          {eventStatistics.map((stat, index) => {
-            const percentage = (stat.frequency / total) * 100;
-            const angle = (percentage / 100) * 360;
-            const radius = 80;
-            const centerX = 100;
-            const centerY = 100;
-            
-            const startAngle = currentAngle;
-            const endAngle = currentAngle + angle;
-            
-            const startX = centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180);
-            const startY = centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180);
-            const endX = centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180);
-            const endY = centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180);
-            
-            const largeArcFlag = angle > 180 ? 1 : 0;
-            
-            const pathData = [
-              `M ${centerX} ${centerY}`,
-              `L ${startX} ${startY}`,
-              `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`,
-              'Z'
-            ].join(' ');
-
-            currentAngle += angle;
-
-            return (
-              <path
-                key={index}
-                d={pathData}
-                fill={stat.color}
-                stroke="#ffffff"
-                strokeWidth="2"
-              />
-            );
-          })}
-        </svg>
-        <div className="pie-chart-legend">
-          {eventStatistics.map((stat, index) => (
-            <div key={index} className="legend-item">
-              <div 
-                className="legend-color" 
-                style={{ backgroundColor: stat.color }}
-              ></div>
-              <span className="legend-text">{stat.name}: {stat.frequency}%</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -133,7 +92,57 @@ const EventDB = ({ onPageChange }) => {
               <h2 className="section-title">Event Statistics (frequency)</h2>
             </div>
             <div className="statistics-content">
-              {renderPieChart()}
+              {eventStatistics.length === 0 ? (
+                <div>통계 데이터가 없습니다.</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={400}>
+                  <PieChart>
+                    <Pie
+                      data={eventStatistics}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      fill="#8884d8"
+                      label={({ name, percent }) =>
+                        `${name} ${(percent * 100).toFixed(1)}%`
+                      }
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                      animationDuration={1000}
+                      animationBegin={0}
+                    >
+                      {eventStatistics.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value, name) => [`${value}%`, name]}
+                      contentStyle={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Legend
+                      verticalAlign="middle"
+                      align="right"
+                      layout="vertical"
+                      iconType="circle"
+                      wrapperStyle={{ 
+                        fontSize: "14px",
+                        fontFamily: '"Space Grotesk", "Noto Sans", sans-serif'
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </section>
         </div>

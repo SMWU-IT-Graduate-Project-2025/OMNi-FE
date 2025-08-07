@@ -15,6 +15,11 @@ const Header = ({ onPageChange }) => {
     }
   };
 
+  const handleEventDBClick = () => {
+    console.log("Header: Event DB clicked!");
+    handlePageClick("event-db");
+  };
+
   console.log(`Header: Component rendered with onPageChange:`, !!onPageChange);
 
   return (
@@ -42,7 +47,13 @@ const Header = ({ onPageChange }) => {
           >
             <b>Alert History</b>
           </span>
-          <span className="header-nav-item"><b>Event DB</b></span>
+          <span 
+            className="header-nav-item" 
+            onClick={handleEventDBClick}
+            style={{ cursor: "pointer" }}
+          >
+            <b>Event DB</b>
+          </span>
           <span className="header-nav-item"><b>Camera Setting</b></span>
         </nav>
       </div>
