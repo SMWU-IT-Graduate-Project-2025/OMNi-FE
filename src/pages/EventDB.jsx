@@ -31,10 +31,10 @@ const EventDB = ({ onPageChange }) => {
   ]);
 
   const [eventStatistics] = useState([
-    { name: "쓰러짐", value: 25 },
+    { name: "쓰러짐", value: 20 },
     { name: "절도", value: 27 },
     { name: "흡연", value: 40 },
-    { name: "유기", value: 8}
+    { name: "유기", value: 13}
   ]);
 
   const handleNewEventSubmit = (e) => {
@@ -89,7 +89,8 @@ const EventDB = ({ onPageChange }) => {
           {/* Event Statistics Section */}
           <section className="event-db-section statistics-section">
             <div className="section-header">
-              <h2 className="section-title">Event Statistics (frequency)</h2>
+              <h2 className="section-title">Event Statistics </h2>
+              <p className="section-subtitle">Analyze a store environment using frequency</p>
             </div>
             <div className="statistics-content">
               {eventStatistics.length === 0 ? (
