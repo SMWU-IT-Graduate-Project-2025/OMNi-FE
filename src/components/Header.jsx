@@ -26,7 +26,11 @@ const Header = ({ onPageChange }) => {
     <header className="header">
       <div className="header-container">
         <div className="header-left">
-            <div className="header-logo">
+            <div 
+              className="header-logo" 
+              onClick={() => handlePageClick("home")}
+              style={{ cursor: "pointer" }}
+            >
                 {/* <img src="public/favicon.ico" alt="OMNi Logo" className="header-logo-img" width={30} height={30}/> */}
                 <span className="header-service-name"> OMNi : for SMIT</span>
             </div>
@@ -54,7 +58,7 @@ const Header = ({ onPageChange }) => {
           >
             <b>Event DB</b>
           </span>
-          <span className="header-nav-item"><b>Camera Setting</b></span>
+          <span className="header-nav-item"><b>Testbed</b></span>
         </nav>
       </div>
     </header>
