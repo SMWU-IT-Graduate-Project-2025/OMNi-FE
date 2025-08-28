@@ -14,6 +14,29 @@ const MainMonitoring = ({ storeName, onPageChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeClip, setActiveClip] = useState(null);
 
+  // thumbUrl 유효성 검사 함수
+  const isThumbUrlValid = (thumbUrl) => {
+    if (!thumbUrl) return false;
+    
+    try {
+      // URL에서 exp 파라미터 추출하여 만료 시간 확인
+      const url = new URL(thumbUrl);
+      const exp = url.searchParams.get('token');
+      if (!exp) return false;
+      
+      // JWT 토큰에서 만료 시간 추출 (간단한 파싱)
+      const tokenParts = exp.split('.');
+      if (tokenParts.length !== 3) return false;
+      
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      
+      return payload.exp > currentTime;
+    } catch (error) {
+      return false;
+    }
+  };
+
   const handleClipClick = (clip) => {
     setActiveClip(clip);
     setIsModalOpen(true);
@@ -63,27 +86,30 @@ const MainMonitoring = ({ storeName, onPageChange }) => {
             <span className="main-section-title">Event Clip Archive</span>
           </div>
           <div className="main-clip-list">
-            {clips.map((clip) => (
-              <div
-                key={clip.id}
-                className="main-clip-item"
-                style={{
-                  backgroundImage: clip.thumbUrl ? `url(${clip.thumbUrl})` : undefined,
-                  backgroundSize: clip.thumbUrl ? "cover" : undefined,
-                  backgroundPosition: clip.thumbUrl ? "center" : undefined,
-                  cursor: "pointer",
-                }}
-                title={clip.title}
-                onClick={() => handleClipClick(clip)}
-              >
-                {!clip.thumbUrl && <span>📁 {clip.title}</span>}
-                {clip.thumbUrl && (
-                  <div className="main-clip-caption">
-                    <span>{clip.title}</span>
-                  </div>
-                )}
-              </div>
-            ))}
+            {clips.map((clip) => {
+              const isThumbValid = isThumbUrlValid(clip.thumbUrl);
+              return (
+                <div
+                  key={clip.id}
+                  className="main-clip-item"
+                  style={{
+                    backgroundImage: isThumbValid ? `url(${clip.thumbUrl})` : undefined,
+                    backgroundSize: isThumbValid ? "cover" : undefined,
+                    backgroundPosition: isThumbValid ? "center" : undefined,
+                    cursor: "pointer",
+                  }}
+                title={clip.title}  
+                  onClick={() => handleClipClick(clip)}
+                >
+                  {!isThumbValid && <span>📁 Clip {clip.id}</span>}
+                  {isThumbValid && (
+                    <div className="main-clip-caption">
+                      <span>{clip.title}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
       </div>
