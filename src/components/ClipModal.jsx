@@ -82,3 +82,4 @@ const ClipModal = ({ isOpen, onClose, clipUrl, title }) => {
 };
 
 export default ClipModal;
+
