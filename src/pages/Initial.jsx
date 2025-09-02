@@ -38,7 +38,7 @@ const Initial = ({ onConnect }) => {
           </h1>
           <input
             type="text"
-            className="initial-input"
+            className="initial-inputname"
             placeholder="가게명을 입력하세요"
             value={storeName}
             onChange={e => setStoreName(e.target.value)}
