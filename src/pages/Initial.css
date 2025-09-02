@@ -363,11 +363,20 @@
 
 .initial-title {
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 800;
   color: #7180CB;
   margin-bottom: 32px;
   letter-spacing: 2px;
   font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+/* 타이핑 커서 애니메이션 */
+.typing-cursor {
+  animation: blink 1s infinite;
+  color: #7180CB;
+}
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 
 .initial-input {
@@ -383,6 +392,27 @@
   transition: border 0.2s;
   font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
+.initial-input:focus {
+  border: 1.5px solid #7180CB;
+  background: #fff;
+}
+
+.initial-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  background: #f8f9fa;
+  transition: border 0.2s;
+  color: #7180CB;
+  font-weight: 500;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+}
+
 .initial-input:focus {
   border: 1.5px solid #7180CB;
   background: #fff;
