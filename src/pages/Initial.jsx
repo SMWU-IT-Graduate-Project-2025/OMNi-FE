@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from "react";
+import useQueryStore from "../store/queryStore";
 import "./Initial.css";
 
 const Initial = ({ onConnect }) => {
@@ -8,6 +9,9 @@ const Initial = ({ onConnect }) => {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   
+  // Zustand store에서 setSelectedQuery 함수 가져오기
+  const { setSelectedQuery } = useQueryStore();
+
   const fullText = "Welcome to OMNi !";
   // 타이핑 애니메이션 효과
   useEffect(() => {
@@ -23,10 +27,36 @@ const Initial = ({ onConnect }) => {
 
   // 선택 가능한 이벤트 쿼리 옵션 정의
   const eventQueryOptions = [
-    { value: "Someone is making a V with two fingers", label: "감지할 이벤트를 선택하세요 (e.g. 브이 하기)" },
+    { value: "Someone is making a V-shape with two fingers", label: "감지할 이벤트를 선택하세요 (e.g. 브이 하기)" },
     { value: "A person is waving his five fingers", label: "카메라에 인사하기" },
     { value: "A person is giving a thumbs-up sign", label: "카메라에 따봉하기" },
   ];
+
+  // 기본 선택값 설정 (첫 로드 시)
+  useEffect(() => {
+    if (!eventQuery && eventQueryOptions.length > 0) {
+      setEventQuery(eventQueryOptions[0].value);
+    }
+  }, [eventQuery]);
+
+  const persistSelectedQuery = () => {
+    const fallback = eventQueryOptions[0];
+    const selectedOption = eventQueryOptions.find(option => option.value === eventQuery) || fallback;
+
+    const extractExample = (label) => {
+      if (!label) return '';
+      const match = label.match(/\((?:e\.g\.\s*)?(.+?)\)/);
+      return match ? match[1].trim() : label;
+    };
+
+    if (selectedOption) {
+      setSelectedQuery({
+        value: selectedOption.value,
+        label: extractExample(selectedOption.label)
+      });
+    }
+    return selectedOption?.value || "";
+  };
 
   return (
     <div className="initial-bg">
@@ -57,13 +87,19 @@ const Initial = ({ onConnect }) => {
           <div className="initial-btn-group">
             <button
               className="initial-connect-btn"
-              onClick={() => onConnect && onConnect(storeName, eventQuery, 'webcam')}
+              onClick={() => {
+                const ensuredValue = persistSelectedQuery();
+                onConnect && onConnect(storeName, ensuredValue, 'webcam');
+              }}
             >
               connect webcam
             </button>
             <button
               className="initial-connect-btn"
-              onClick={() => onConnect && onConnect(storeName, eventQuery, 'mobile')}
+              onClick={() => {
+                const ensuredValue = persistSelectedQuery();
+                onConnect && onConnect(storeName, ensuredValue, 'mobile');
+              }}
             >
               mobile cam
             </button>

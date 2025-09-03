@@ -3,6 +3,7 @@ import "./MainMonitoring.css";
 import Header from "../components/Header";
 import ClipModal from "../components/ClipModal";
 import useWebcamController from "../components/WebcamController";
+import useQueryStore from "../store/queryStore";
 
 const MainMonitoring = ({ storeName, onPageChange, camType }) => {
   const [clips, setClips] = useState([
@@ -29,6 +30,9 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
     toggleWebcamStatus
   } = useWebcamController(camType);
 
+  // Zustand store에서 선택된 쿼리 정보 가져오기
+  const { selectedQuery } = useQueryStore();
+
   // thumbUrl 유효성 검사 함수
   const isThumbUrlValid = (thumbUrl) => {
     if (!thumbUrl) return false;
@@ -51,8 +55,6 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
       return false;
     }
   };
-
-
 
   const handleClipClick = (clip) => {
     setActiveClip(clip);
@@ -97,6 +99,32 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
                  webcamStatus === 'error' ? 'Error' : 'Stopped'}
               </span>
             </div>
+            {selectedQuery.value && (
+              <div className="main-query-info" style={{
+                padding: "8px 16px",
+                margin: "8px 0",
+                backgroundColor: "#f8f9fa",
+                borderRadius: "6px",
+                border: "1px solid #e9ecef",
+                fontSize: "14px",
+                color: "#495057"
+              }}>
+                <strong>감지 대상:</strong> {selectedQuery.label}
+              </div>
+            )}
+            {!selectedQuery.value && (
+              <div className="main-query-info" style={{
+                padding: "8px 16px",
+                margin: "8px 0",
+                backgroundColor: "#fff3cd",
+                borderRadius: "6px",
+                border: "1px solid #ffeaa7",
+                fontSize: "14px",
+                color: "#856404"
+              }}>
+                <strong>⚠️ 경고:</strong> 감지할 이벤트가 선택되지 않았습니다. 초기 페이지에서 이벤트를 선택해주세요.
+              </div>
+            )}
             <div className="main-live-video">
               {isWebcamActive ? (
                 <video
