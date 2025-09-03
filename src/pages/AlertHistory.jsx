@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./AlertHistory.css";
-import Header from "../components/Header";
+import Header from "../components/Header.jsx";
 import ClipModal from "../components/ClipModal";
 
 const AlertHistory = ({ onPageChange }) => {

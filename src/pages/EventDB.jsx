@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import "./EventDB.css";
-import Header from "../components/Header";
+import Header from "../components/Header.jsx";
 
 const COLORS = [
   "#e9c46a",
