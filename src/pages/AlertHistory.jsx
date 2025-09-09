@@ -165,12 +165,12 @@ const AlertHistory = ({ onPageChange }) => {
           </div>
         </div>
         
-        <h3 className="alert-section-title">Today</h3>
+        <h3 className="alert-section-title">Yesterday</h3>
         <div className="alert-list">
           {todayAlerts.map(renderAlertItem)}
         </div>
 
-        <h3 className="alert-section-title">Yesterday</h3>
+        <h3 className="alert-section-title">This Month</h3>
         <div className="alert-list">
           {yesterdayAlerts.map(renderAlertItem)}
         </div>

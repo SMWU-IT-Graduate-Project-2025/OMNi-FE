@@ -15,6 +15,12 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeClip, setActiveClip] = useState(null);
+  const [recentAlerts, setRecentAlerts] = useState([
+    "[22:03:15] 이상행동 감지 - 흡연",
+    "[11:47:00] 이상행동 감지 - 쓰러짐", 
+    "[10:55:42] 이상행동 감지 - 파손손상",
+    "[02:38:21] 이상행동 감지 - 도난"
+  ]);
   
   // 웹캠 컨트롤러 훅 사용
   const {
@@ -23,114 +29,72 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
     isWebcamActive,
     webcamStatus,
     videoRef,
+    canvasRef,
+    isCapturing,
+    lastInferenceResult,
+    inferenceError,
     connectWebcam,
     pauseWebcam,
     resumeWebcam,
     disconnectWebcam,
-    toggleWebcamStatus
+    toggleWebcamStatus,
+    startCapturing,
+    stopCapturing,
+    toggleCapturing,
+    captureAndSendImage
   } = useWebcamController(camType);
 
   // Zustand store에서 선택된 쿼리 정보 가져오기
   const { selectedQuery } = useQueryStore();
 
-  // ================= VLM similarity overlay states =================
+  // ================= VLM inference result display =================
   const [latestScore, setLatestScore] = useState(null); // number | null
-  const [isInferBusy, setIsInferBusy] = useState(false);
-  const canvasRef = useRef(null);
-  const frameBufferRef = useRef([]); // base64 JPEG strings
-  const WINDOW_SIZE = 6; // match inference_example.py
-  const SAMPLE_FPS = 2; // frames per second
-  const inferEndpoint = useMemo(() => {
-    // 구성 가능하도록 환경변수 우선, 없으면 기본값
-    return (
-      import.meta.env.VLM_ENDPOINT || 
-      "/api/vlm/similarity"
-    );
-  }, []);
-
-  // 캔버스 보조 함수: 현재 프레임을 캡처해 JPEG base64로 반환
-  const captureCurrentFrame = () => {
-    const videoEl = videoRef.current;
-    if (!videoEl) return null;
-    const width = Math.max(1, Math.floor(videoEl.videoWidth || 640));
-    const height = Math.max(1, Math.floor(videoEl.videoHeight || 360));
-
-    if (!canvasRef.current) {
-      canvasRef.current = document.createElement("canvas");
-    }
-    const canvas = canvasRef.current;
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-    ctx.drawImage(videoEl, 0, 0, width, height);
-    return canvas.toDataURL("image/jpeg", 0.7); // base64
-  };
-
-  // 윈도우 크기만큼 모이면 추론 API 호출
-  const maybeInferWindow = async () => {
-    if (isInferBusy) return;
-    const frames = frameBufferRef.current;
-    if (frames.length < WINDOW_SIZE) return;
-    try {
-      setIsInferBusy(true);
-      const body = {
-        frames, // [base64jpeg]
-        query: selectedQuery?.value || null,
-        windowSize: WINDOW_SIZE,
-        fps: SAMPLE_FPS
-      };
-      const res = await fetch(inferEndpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) throw new Error(`infer http ${res.status}`);
-      const data = await res.json();
-      // 기대 형태: { similarity: number } 또는 { score: number }
-      const score =
-        typeof data?.similarity === "number"
-          ? data.similarity
-          : typeof data?.score === "number"
-          ? data.score
-          : null;
-      if (score != null && isFinite(score)) {
+  const [eventDetected, setEventDetected] = useState(false);
+  const [detectionMessage, setDetectionMessage] = useState('');
+  const [threshold, setThreshold] = useState(null);
+  
+  // API 응답 결과를 상태에 반영
+  useEffect(() => {
+    if (lastInferenceResult) {
+      // similarity_score 파싱
+      const score = lastInferenceResult.similarityScore;
+      if (typeof score === 'number' && isFinite(score)) {
         setLatestScore(score);
       }
-    } catch (e) {
-      console.error("VLM infer 실패", e);
-    } finally {
-      setIsInferBusy(false);
-    }
-  };
-
-  // 주기적으로 프레임 샘플링 및 슬라이딩 윈도우 관리
-  useEffect(() => {
-    if (!isWebcamActive || !videoRef.current) return;
-    if (!selectedQuery?.value) return; // 쿼리 미선택 시 샘플링 중단
-
-    let cancelled = false;
-    const intervalMs = Math.max(250, Math.floor(1000 / SAMPLE_FPS));
-    const intervalId = setInterval(() => {
-      if (cancelled) return;
-      const img = captureCurrentFrame();
-      if (!img) return;
-      // 슬라이딩 윈도우: 크기 유지하며 한 프레임씩 밀기
-      const buffer = frameBufferRef.current;
-      buffer.push(img);
-      if (buffer.length > WINDOW_SIZE) buffer.shift();
-      // 윈도우 차면 추론 시도
-      if (buffer.length === WINDOW_SIZE) {
-        maybeInferWindow();
+      
+      // 이벤트 감지 상태 업데이트
+      const wasEventDetected = lastInferenceResult.eventDetected || false;
+      setEventDetected(wasEventDetected);
+      setDetectionMessage(lastInferenceResult.message || '');
+      setThreshold(lastInferenceResult.threshold || null);
+      
+      // 이벤트가 감지되면 Recent Alerts에 추가
+      if (wasEventDetected && lastInferenceResult.queryLabel) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ko-KR', { 
+          hour12: false, 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit' 
+        });
+        
+        const newAlert = `[${timeString}] 이벤트 감지 - ${lastInferenceResult.queryLabel}`;
+        
+        setRecentAlerts(prev => {
+          // 중복 방지: 같은 시간대에 같은 이벤트가 감지되면 추가하지 않음
+          const isDuplicate = prev.some(alert => 
+            alert.includes(lastInferenceResult.queryLabel) && 
+            Math.abs(new Date(alert.match(/\[(\d{2}:\d{2}:\d{2})\]/)?.[1] || '00:00:00').getTime() - now.getTime()) < 5000
+          );
+          
+          if (!isDuplicate) {
+            return [newAlert, ...prev.slice(0, 9)]; // 최대 10개 유지
+          }
+          return prev;
+        });
       }
-    }, intervalMs);
-
-    return () => {
-      cancelled = true;
-      clearInterval(intervalId);
-      frameBufferRef.current = [];
-    };
-  }, [isWebcamActive, selectedQuery?.value, videoRef]);
+    }
+  }, [lastInferenceResult]);
 
   // thumbUrl 유효성 검사 함수
   const isThumbUrlValid = (thumbUrl) => {
@@ -177,26 +141,44 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
             <div className="main-section-header">
               <span className="main-section-icon">📷</span>
               <span className="main-section-title">Live Monitoring</span>
-              <span 
-                className="main-status-badge"
-                onClick={toggleWebcamStatus}
-                style={{ 
-                  cursor: 'pointer',
-                  backgroundColor: webcamStatus === 'connected' ? '#d4edda' : 
-                                  webcamStatus === 'disconnected' ? '#fff3cd' : 
-                                  webcamStatus === 'paused' ? '#e2e3e5' :
-                                  webcamStatus === 'error' ? '#f8d7da' : '#f8d7da',
-                  color: webcamStatus === 'connected' ? '#155724' : 
-                         webcamStatus === 'disconnected' ? '#856404' : 
-                         webcamStatus === 'paused' ? '#6c757d' :
-                         webcamStatus === 'error' ? '#721c24' : '#721c24'
-                }}
-              >
-                {webcamStatus === 'connected' ? 'Connected' : 
-                 webcamStatus === 'disconnected' ? 'Connecting...' : 
-                 webcamStatus === 'paused' ? 'Paused' :
-                 webcamStatus === 'error' ? 'Error' : 'Stopped'}
-              </span>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <span 
+                  className="main-status-badge"
+                  onClick={toggleWebcamStatus}
+                  style={{ 
+                    cursor: 'pointer',
+                    backgroundColor: webcamStatus === 'connected' ? '#d4edda' : 
+                                    webcamStatus === 'disconnected' ? '#fff3cd' : 
+                                    webcamStatus === 'paused' ? '#e2e3e5' :
+                                    webcamStatus === 'error' ? '#f8d7da' : '#f8d7da',
+                    color: webcamStatus === 'connected' ? '#155724' : 
+                           webcamStatus === 'disconnected' ? '#856404' : 
+                           webcamStatus === 'paused' ? '#6c757d' :
+                           webcamStatus === 'error' ? '#721c24' : '#721c24'
+                  }}
+                >
+                  {webcamStatus === 'connected' ? 'Connected' : 
+                   webcamStatus === 'disconnected' ? 'Connecting...' : 
+                   webcamStatus === 'paused' ? 'Paused' :
+                   webcamStatus === 'error' ? 'Error' : 'Stopped'}
+                </span>
+                {webcamStatus === 'connected' && (
+                  <button
+                    onClick={toggleCapturing}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      backgroundColor: isCapturing ? '#dc3545' : '#28a745',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isCapturing ? 'Stop Capture' : 'Start Capture'}
+                  </button>
+                )}
+              </div>
             </div>
             {selectedQuery.value && (
               <div className="main-query-info" style={{
@@ -225,6 +207,11 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
               </div>
             )}
             <div className="main-live-video" style={{ position: "relative" }}>
+              {/* 숨겨진 캔버스 요소 - 이미지 캡처용 */}
+              <canvas
+                ref={canvasRef}
+                style={{ display: 'none' }}
+              />
               {isWebcamActive ? (
                 <video
                   ref={videoRef}
@@ -263,31 +250,65 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
                 <span className="main-live-video-text">📷 실시간 영상 스트림</span>
               )}
 
-              {/* 우상단 오버레이: similarity score */}
-              {isWebcamActive && selectedQuery?.value && (
+              {/* 우상단 오버레이: 추론 결과 및 오류 표시 */}
+              {isWebcamActive && (selectedQuery?.value || inferenceError) && (
                 <div
                   style={{
                     position: "absolute",
                     top: 10,
                     right: 10,
-                    background: "rgba(0,0,0,0.55)",
+                    background: inferenceError 
+                      ? "rgba(220,53,69,0.8)" 
+                      : eventDetected 
+                        ? "rgba(40,167,69,0.8)" 
+                        : "rgba(0,0,0,0.55)",
                     color: "#fff",
                     padding: "8px 12px",
                     borderRadius: 8,
                     fontSize: 14,
                     display: "flex",
-                    gap: 8,
-                    alignItems: "center",
+                    flexDirection: "column",
+                    gap: 4,
+                    alignItems: "flex-start",
                     border: "1px solid rgba(255,255,255,0.2)",
-                    backdropFilter: "blur(2px)"
+                    backdropFilter: "blur(2px)",
+                    minWidth: "200px"
                   }}
                 >
-                  <span style={{ opacity: 0.9 }}>Similarity</span>
-                  <strong style={{ fontVariantNumeric: "tabular-nums" }}>
-                    {latestScore == null ? "–" : latestScore.toFixed(3)}
-                  </strong>
-                  {isInferBusy && (
-                    <span style={{ fontSize: 12, opacity: 0.8 }}>estimating…</span>
+                  {inferenceError ? (
+                    <>
+                      <span style={{ opacity: 0.9, fontWeight: "bold" }}>❌ Error</span>
+                      <span style={{ fontSize: 12, opacity: 0.8 }}>{inferenceError}</span>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ opacity: 0.9, fontWeight: "bold" }}>
+                          {eventDetected ? "🎯 이벤트 감지됨" : "👁️ 모니터링 중"}
+                        </span>
+                        {isCapturing && (
+                          <span style={{ fontSize: 12, opacity: 0.8 }}>capturing…</span>
+                        )}
+                      </div>
+                      
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ opacity: 0.9 }}>Similarity:</span>
+                        <strong style={{ fontVariantNumeric: "tabular-nums" }}>
+                          {latestScore == null ? "–" : latestScore.toFixed(3)}
+                        </strong>
+                        {threshold && (
+                          <span style={{ fontSize: 12, opacity: 0.7 }}>
+                            (threshold: {threshold.toFixed(3)})
+                          </span>
+                        )}
+                      </div>
+                      
+                      {detectionMessage && (
+                        <div style={{ fontSize: 12, opacity: 0.8, fontStyle: "italic" }}>
+                          {detectionMessage}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
@@ -300,10 +321,19 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
             <span className="main-section-title">Recent Alerts</span>
           </div>
           <div className="main-alert-list">
-            <div className="main-alert-item">[22:03:15] 이상행동 감지 - 흡연</div>
-            <div className="main-alert-item">[11:47:00] 이상행동 감지 - 쓰러짐</div>
-            <div className="main-alert-item">[10:55:42] 이상행동 감지 - 파손손상</div>
-            <div className="main-alert-item">[02:38:21] 이상행동 감지 - 도난</div>
+            {recentAlerts.map((alert, index) => (
+              <div 
+                key={index} 
+                className="main-alert-item"
+                style={{
+                  backgroundColor: index === 0 && eventDetected ? 'rgba(40,167,69,0.1)' : 'transparent',
+                  borderLeft: index === 0 && eventDetected ? '3px solid #28a745' : 'none',
+                  fontWeight: index === 0 && eventDetected ? 'bold' : 'normal'
+                }}
+              >
+                {alert}
+              </div>
+            ))}
           </div>
         </aside>
       </div>
@@ -311,7 +341,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
         <section className="main-section event-clip-section">
           <div className="main-section-header">
             <span className="main-section-icon">⏲️</span>
-            <span className="main-section-title">Event Clip Archive</span>
+            <span className="main-section-title">Last Clip Archive</span>
           </div>
           <div className="main-clip-list">
             {clips.map((clip) => {
