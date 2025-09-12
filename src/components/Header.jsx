@@ -1,7 +1,7 @@
 import React from "react";
 import "./Header.css";
 
-const Header = ({ onPageChange }) => {
+const Header = ({ onPageChange, storeName }) => {
   const handlePageClick = (pageName) => {
     console.log(`Header: Click detected for ${pageName}`);
     console.log(`Header: onPageChange function exists:`, !!onPageChange);
@@ -32,7 +32,7 @@ const Header = ({ onPageChange }) => {
               style={{ cursor: "pointer" }}
             >
                 {/* <img src="public/favicon.ico" alt="OMNi Logo" className="header-logo-img" width={30} height={30}/> */}
-                <span className="header-service-name"> OMNi : for SMIT</span>
+                <span className="header-service-name"> OMNi : for {storeName || "SMIT"}</span>
             </div>
           
         </div>

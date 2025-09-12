@@ -131,7 +131,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
 
   return (
     <div className="main-root">
-      <Header onPageChange={onPageChange} />
+      <Header onPageChange={onPageChange} storeName={storeName} />
       <div className="main-content-area">
         <div className="main-content-left">
           {/* <div className="main-store-name">
