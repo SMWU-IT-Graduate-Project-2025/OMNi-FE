@@ -1,6 +1,7 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import useQueryStore from "../store/queryStore";
+import { StoreContext } from "../StoreContext";
 import "./Initial.css";
 
 const Initial = ({ onConnect }) => {
@@ -9,6 +10,8 @@ const Initial = ({ onConnect }) => {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   
+  const { setStoreName: setGlobalStoreName } = useContext(StoreContext);
+
   // Zustand store에서 setSelectedQuery 함수 가져오기
   const { setSelectedQuery } = useQueryStore();
 
@@ -89,6 +92,7 @@ const Initial = ({ onConnect }) => {
               className="initial-connect-btn"
               onClick={() => {
                 const ensuredValue = persistSelectedQuery();
+                setGlobalStoreName(storeName);
                 onConnect && onConnect(storeName, ensuredValue, 'webcam');
               }}
             >
@@ -98,6 +102,7 @@ const Initial = ({ onConnect }) => {
               className="initial-connect-btn"
               onClick={() => {
                 const ensuredValue = persistSelectedQuery();
+                setGlobalStoreName(storeName);
                 onConnect && onConnect(storeName, ensuredValue, 'mobile');
               }}
             >

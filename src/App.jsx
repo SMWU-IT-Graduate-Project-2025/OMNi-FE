@@ -1,3 +1,4 @@
+import { StoreProvider } from "./StoreContext";
 import { useState } from "react";
 import Initial from "./pages/Initial";
 import MainMonitoring from "./pages/MainMonitoring";
@@ -6,12 +7,10 @@ import EventDB from "./pages/EventDB";
 
 export default function OMNiApp() {
   const [page, setPage] = useState("home");
-  const [storeName, setStoreName] = useState("");
   const [eventQuery, setEventQuery] = useState("");
   const [camType, setCamType] = useState("");
 
   const handleConnect = (store, event, cam) => {
-    setStoreName(store);
     setEventQuery(event);
     setCamType(cam);
     setPage("monitoring");
@@ -36,7 +35,6 @@ export default function OMNiApp() {
     } else if (page === "monitoring") {
       return (
         <MainMonitoring 
-          storeName={storeName} 
           eventQuery={eventQuery} 
           camType={camType}
           onPageChange={handlePageChange}
@@ -50,7 +48,6 @@ export default function OMNiApp() {
     } else {
       return (
         <MainMonitoring 
-          storeName={storeName} 
           eventQuery={eventQuery} 
           camType={camType}
           onPageChange={handlePageChange}
@@ -60,8 +57,10 @@ export default function OMNiApp() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 font-sans">
-      {renderCurrentPage()}
-    </div>
+    <StoreProvider>
+      <div className="min-h-screen bg-white text-gray-800 font-sans">
+        {renderCurrentPage()}
+      </div>
+    </StoreProvider>
   );
 }
