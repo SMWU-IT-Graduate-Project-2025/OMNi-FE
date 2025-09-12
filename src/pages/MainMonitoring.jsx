@@ -16,12 +16,14 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeClip, setActiveClip] = useState(null);
   const [recentAlerts, setRecentAlerts] = useState([
-    "[22:03:15] 이상행동 감지 - 흡연",
-    "[11:47:00] 이상행동 감지 - 쓰러짐", 
-    "[10:55:42] 이상행동 감지 - 파손손상",
-    "[02:38:21] 이상행동 감지 - 도난"
+    { text: "[22:03:15] 이상행동 감지 - 흡연", unread: false },
+    { text: "[11:47:00] 이상행동 감지 - 쓰러짐", unread: false },
+    { text: "[10:55:42] 이상행동 감지 - 파손손상", unread: false },
+    { text: "[02:38:21] 이상행동 감지 - 도난", unread: false },
   ]);
   
+  const [hasNewAlert, setHasNewAlert] = useState(false);
+
   // 웹캠 컨트롤러 훅 사용
   const {
     webcamStream,
@@ -52,6 +54,8 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
   const [eventDetected, setEventDetected] = useState(false);
   const [detectionMessage, setDetectionMessage] = useState('');
   const [threshold, setThreshold] = useState(null);
+  const [eventActive, setEventActive] = useState(false);
+
   
   // API 응답 결과를 상태에 반영
   useEffect(() => {
@@ -64,37 +68,23 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
       
       // 이벤트 감지 상태 업데이트
       const wasEventDetected = lastInferenceResult.eventDetected || false;
+      setEventActive(lastInferenceResult.eventActive || false);
       setEventDetected(wasEventDetected);
       setDetectionMessage(lastInferenceResult.message || '');
       setThreshold(lastInferenceResult.threshold || null);
       
-      // 이벤트가 감지되면 Recent Alerts에 추가
-      if (wasEventDetected && lastInferenceResult.queryLabel) {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('ko-KR', { 
-          hour12: false, 
-          hour: '2-digit', 
-          minute: '2-digit', 
-          second: '2-digit' 
-        });
-        
-        const newAlert = `[${timeString}] 이벤트 감지 - ${lastInferenceResult.queryLabel}`;
-        
-        setRecentAlerts(prev => {
-          // 중복 방지: 같은 시간대에 같은 이벤트가 감지되면 추가하지 않음
-          const isDuplicate = prev.some(alert => 
-            alert.includes(lastInferenceResult.queryLabel) && 
-            Math.abs(new Date(alert.match(/\[(\d{2}:\d{2}:\d{2})\]/)?.[1] || '00:00:00').getTime() - now.getTime()) < 5000
-          );
-          
-          if (!isDuplicate) {
-            return [newAlert, ...prev.slice(0, 9)]; // 최대 10개 유지
-          }
-          return prev;
-        });
-      }
+      // Recent Alerts에는 "새 이벤트 감지"만 추가
+    if (lastInferenceResult.eventDetected && lastInferenceResult.queryLabel) {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('ko-KR', { hour12: false });
+      const newAlert = {
+        text: `[${timeString}] 이벤트 감지 - ${lastInferenceResult.queryLabel}`,
+        unread: true,
+      };
+      setRecentAlerts(prev => [newAlert, ...prev.slice(0, 9)]);
     }
-  }, [lastInferenceResult]);
+  }
+}, [lastInferenceResult]);
 
   // thumbUrl 유효성 검사 함수
   const isThumbUrlValid = (thumbUrl) => {
@@ -259,7 +249,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
                     right: 10,
                     background: inferenceError 
                       ? "rgba(220,53,69,0.8)" 
-                      : eventDetected 
+                      : eventActive 
                         ? "rgba(40,167,69,0.8)" 
                         : "rgba(0,0,0,0.55)",
                     color: "#fff",
@@ -284,7 +274,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ opacity: 0.9, fontWeight: "bold" }}>
-                          {eventDetected ? "🎯 이벤트 감지됨" : "👁️ 모니터링 중"}
+                          {eventActive ? "🎯 이벤트 감지됨" : "👁️ 모니터링 중"}
                         </span>
                         {isCapturing && (
                           <span style={{ fontSize: 12, opacity: 0.8 }}>capturing…</span>
@@ -316,9 +306,26 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
           </section>
         </div>
         <aside className="main-content-right">
-          <div className="main-section-header">
+          <div className="main-section-header" style={{ position: "relative" }}>
             <span className="main-section-icon">🔔</span>
             <span className="main-section-title">Recent Alerts</span>
+            {recentAlerts.some(alert => alert.unread) && (
+              <span
+                onClick={() => {
+                  // 빨간 점 클릭 → 모든 알림 읽음 처리
+                  setRecentAlerts(prev => prev.map(a => ({ ...a, unread: false })));
+                }}
+                style={{
+                  display: "inline-block",
+                  width: "10px",
+                  height: "10px",
+                  backgroundColor: "red",
+                  borderRadius: "50%",
+                  marginLeft: "8px",
+                  cursor: "pointer"
+                }}
+              ></span>
+            )}
           </div>
           <div className="main-alert-list">
             {recentAlerts.map((alert, index) => (
@@ -328,10 +335,16 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
                 style={{
                   backgroundColor: index === 0 && eventDetected ? 'rgba(40,167,69,0.1)' : 'transparent',
                   borderLeft: index === 0 && eventDetected ? '3px solid #28a745' : 'none',
-                  fontWeight: index === 0 && eventDetected ? 'bold' : 'normal'
+                  fontWeight: index === 0 && eventDetected ? 'bold' : 'normal',
+                  backgroundColor: alert.unread ? "rgba(255, 132, 132, 0.6)" : "transparent", // 👈 새 알림 하이라이트
+                  borderLeft: alert.unread ? "3px solid red" : "none",
+                  display: "block",
+                  width: "fit-content",
+                  padding: alert.unread ? "2px 4px" : "0",
+                  borderRadius: alert.unread ? "3px" : "0"
                 }}
               >
-                {alert}
+                {alert.text}
               </div>
             ))}
           </div>
