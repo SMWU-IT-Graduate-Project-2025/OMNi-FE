@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import "./EventDB.css";
 import Header from "../components/Header.jsx";
+import { StoreContext } from "../StoreContext";
 
 const COLORS = [
   "#e9c46a",
@@ -20,6 +21,7 @@ const COLORS = [
 ];
 
 const EventDB = ({ onPageChange }) => {
+  const { storeName } = useContext(StoreContext);
   const [newEventDescription, setNewEventDescription] = useState("");
   const [existingEvents] = useState([
     { id: 1, name: "쓰러짐", description: "사람이 쓰러지는 상황 감지" },

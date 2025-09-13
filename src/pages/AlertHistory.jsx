@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import "./AlertHistory.css";
 import Header from "../components/Header.jsx";
+import { StoreContext } from "../StoreContext";
 import ClipModal from "../components/ClipModal";
 
 const AlertHistory = ({ onPageChange }) => {
+  const { storeName } = useContext(StoreContext);
   const [todayAlerts, setTodayAlerts] = useState([
     {
       id: 1,

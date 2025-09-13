@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useContext } from "react";
 import "./MainMonitoring.css";
 import Header from "../components/Header.jsx";
 import ClipModal from "../components/ClipModal";
 import useWebcamController from "../components/WebcamController";
 import useQueryStore from "../store/queryStore";
+import { StoreContext } from "../StoreContext";
 
-const MainMonitoring = ({ storeName, onPageChange, camType }) => {
+const MainMonitoring = ({ onPageChange, camType }) => {
+  const { storeName } = useContext(StoreContext);
   const [clips, setClips] = useState([
     { id: 1, title: "[실내흡연]", thumbUrl: "https://cspfqqyuamxurtsvgypt.supabase.co/storage/v1/object/sign/existing-samples/smoking-1-image.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85YzFkNmZkMC02ZWYzLTQ0ZWEtOWYxZS03ZTQ0ZjkxNGEwNWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJleGlzdGluZy1zYW1wbGVzL3Ntb2tpbmctMS1pbWFnZS5wbmciLCJpYXQiOjE3NTYzNTA2NDksImV4cCI6MTc1ODk0MjY0OX0.9s2bF5Z8dHR5mybya9LA42Mw2QAAoAGxaPJUgGXOSWg", videoUrl: "https://cspfqqyuamxurtsvgypt.supabase.co/storage/v1/object/sign/existing-samples/smoking-1.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85YzFkNmZkMC02ZWYzLTQ0ZWEtOWYxZS03ZTQ0ZjkxNGEwNWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJleGlzdGluZy1zYW1wbGVzL3Ntb2tpbmctMS5tcDQiLCJpYXQiOjE3NTYzNTE4NjUsImV4cCI6MTc1ODk0Mzg2NX0.EvCFTB24qAEFgr-grDLR9I0LTV2RkQuYQbQNfwX448w" },
     { id: 2, title: "[쓰러짐]", thumbUrl: "https://cspfqqyuamxurtsvgypt.supabase.co/storage/v1/object/sign/existing-samples/fall-1-image.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85YzFkNmZkMC02ZWYzLTQ0ZWEtOWYxZS03ZTQ0ZjkxNGEwNWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJleGlzdGluZy1zYW1wbGVzL2ZhbGwtMS1pbWFnZS5wbmciLCJpYXQiOjE3NTYzNTA2MzcsImV4cCI6MTc1ODk0MjYzN30.9uehBKfO8aHOWveVlxk-BXYvTfgoK5zk06_39pdzfPo", videoUrl: "https://cspfqqyuamxurtsvgypt.supabase.co/storage/v1/object/sign/existing-samples/fall-1.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85YzFkNmZkMC02ZWYzLTQ0ZWEtOWYxZS03ZTQ0ZjkxNGEwNWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJleGlzdGluZy1zYW1wbGVzL2ZhbGwtMS5tcDQiLCJpYXQiOjE3NTYzNTE4NTAsImV4cCI6MTc1ODk0Mzg1MH0.U8BzbqndzV0ZVp_NRZvN5Rt8-e8SAMmaqJLV7U7BhgU" },
@@ -54,7 +56,6 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
   const [eventDetected, setEventDetected] = useState(false);
   const [detectionMessage, setDetectionMessage] = useState('');
   const [threshold, setThreshold] = useState(null);
-  const [eventActive, setEventActive] = useState(false);
 
   
   // API 응답 결과를 상태에 반영
@@ -68,22 +69,40 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
       
       // 이벤트 감지 상태 업데이트
       const wasEventDetected = lastInferenceResult.eventDetected || false;
-      setEventActive(lastInferenceResult.eventActive || false);
       setEventDetected(wasEventDetected);
       setDetectionMessage(lastInferenceResult.message || '');
       setThreshold(lastInferenceResult.threshold || null);
       
-      // Recent Alerts에는 "새 이벤트 감지"만 추가
-    if (lastInferenceResult.eventDetected && lastInferenceResult.queryLabel) {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('ko-KR', { hour12: false });
-      const newAlert = {
-        text: `[${timeString}] 이벤트 감지 - ${lastInferenceResult.queryLabel}`,
-        unread: true,
-      };
-      setRecentAlerts(prev => [newAlert, ...prev.slice(0, 9)]);
+      // 이벤트가 감지되면 Recent Alerts에 추가
+      if (wasEventDetected && lastInferenceResult.queryLabel) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ko-KR', { 
+          hour12: false, 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit' 
+        });
+        
+        const newAlert = { 
+          text: `[${timeString}] 이벤트 감지 - ${lastInferenceResult.queryLabel}`,
+           unread: true
+        };
+        
+        setRecentAlerts(prev => {
+          // 중복 방지: 같은 시간대에 같은 이벤트가 감지되면 추가하지 않음
+          const isDuplicate = prev.some(alert => 
+            alert.text.includes(lastInferenceResult.queryLabel) &&
+            Math.abs(
+              new Date(alert.text.match(/\[(\d{2}:\d{2}:\d{2})\]/)?.[1] || '00:00:00').getTime()- now.getTime()) < 5000
+          );
+          
+          if (!isDuplicate) {
+            return [newAlert, ...prev.slice(0, 9)]; // 최대 10개 유지
+          }
+          return prev;
+        });
+      }
     }
-  }
 }, [lastInferenceResult]);
 
   // thumbUrl 유효성 검사 함수
@@ -121,11 +140,11 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
 
   return (
     <div className="main-root">
-      <Header onPageChange={onPageChange} storeName={storeName} />
+      <Header onPageChange={onPageChange} />
       <div className="main-content-area">
         <div className="main-content-left">
           {/* <div className="main-store-name">
-            <b>OMNi : for <span className="main-store-name-input">{storeName || "SMIT"} </span></b>
+            <b>OMNi : for <span className="main-store-name-input">{"SMIT"} </span></b>
           </div> */}
           <section className="main-section live-monitoring-section">
             <div className="main-section-header">
@@ -249,7 +268,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
                     right: 10,
                     background: inferenceError 
                       ? "rgba(220,53,69,0.8)" 
-                      : eventActive 
+                      : eventDetected 
                         ? "rgba(40,167,69,0.8)" 
                         : "rgba(0,0,0,0.55)",
                     color: "#fff",
@@ -274,7 +293,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ opacity: 0.9, fontWeight: "bold" }}>
-                          {eventActive ? "🎯 이벤트 감지됨" : "👁️ 모니터링 중"}
+                          {eventDetected ? "🎯 이벤트 감지됨" : "👁️ 모니터링 중"}
                         </span>
                         {isCapturing && (
                           <span style={{ fontSize: 12, opacity: 0.8 }}>capturing…</span>

@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./Header.css";
+import { StoreContext } from "../StoreContext";
 
-const Header = ({ onPageChange, storeName }) => {
+const Header = ({ onPageChange }) => {
+  const { storeName } = useContext(StoreContext);
   const handlePageClick = (pageName) => {
     console.log(`Header: Click detected for ${pageName}`);
     console.log(`Header: onPageChange function exists:`, !!onPageChange);
