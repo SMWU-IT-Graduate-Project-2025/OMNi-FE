@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useContext } from "react";
 import "./MainMonitoring.css";
 import Header from "../components/Header.jsx";
 import ClipModal from "../components/ClipModal";
 import useWebcamController from "../components/WebcamController";
 import useQueryStore from "../store/queryStore";
+import { StoreContext } from "../StoreContext";
 
-const MainMonitoring = ({ storeName, onPageChange, camType }) => {
+const MainMonitoring = ({ onPageChange, camType }) => {
+  const { storeName } = useContext(StoreContext);
   const [clips, setClips] = useState([
     { id: 1, title: "[실내흡연]", thumbUrl: "https://cspfqqyuamxurtsvgypt.supabase.co/storage/v1/object/sign/existing-samples/smoking-1-image.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85YzFkNmZkMC02ZWYzLTQ0ZWEtOWYxZS03ZTQ0ZjkxNGEwNWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJleGlzdGluZy1zYW1wbGVzL3Ntb2tpbmctMS1pbWFnZS5wbmciLCJpYXQiOjE3NTYzNTA2NDksImV4cCI6MTc1ODk0MjY0OX0.9s2bF5Z8dHR5mybya9LA42Mw2QAAoAGxaPJUgGXOSWg", videoUrl: "https://cspfqqyuamxurtsvgypt.supabase.co/storage/v1/object/sign/existing-samples/smoking-1.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85YzFkNmZkMC02ZWYzLTQ0ZWEtOWYxZS03ZTQ0ZjkxNGEwNWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJleGlzdGluZy1zYW1wbGVzL3Ntb2tpbmctMS5tcDQiLCJpYXQiOjE3NTYzNTE4NjUsImV4cCI6MTc1ODk0Mzg2NX0.EvCFTB24qAEFgr-grDLR9I0LTV2RkQuYQbQNfwX448w" },
     { id: 2, title: "[쓰러짐]", thumbUrl: "https://cspfqqyuamxurtsvgypt.supabase.co/storage/v1/object/sign/existing-samples/fall-1-image.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85YzFkNmZkMC02ZWYzLTQ0ZWEtOWYxZS03ZTQ0ZjkxNGEwNWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJleGlzdGluZy1zYW1wbGVzL2ZhbGwtMS1pbWFnZS5wbmciLCJpYXQiOjE3NTYzNTA2MzcsImV4cCI6MTc1ODk0MjYzN30.9uehBKfO8aHOWveVlxk-BXYvTfgoK5zk06_39pdzfPo", videoUrl: "https://cspfqqyuamxurtsvgypt.supabase.co/storage/v1/object/sign/existing-samples/fall-1.mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85YzFkNmZkMC02ZWYzLTQ0ZWEtOWYxZS03ZTQ0ZjkxNGEwNWYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJleGlzdGluZy1zYW1wbGVzL2ZhbGwtMS5tcDQiLCJpYXQiOjE3NTYzNTE4NTAsImV4cCI6MTc1ODk0Mzg1MH0.U8BzbqndzV0ZVp_NRZvN5Rt8-e8SAMmaqJLV7U7BhgU" },
@@ -16,12 +18,14 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeClip, setActiveClip] = useState(null);
   const [recentAlerts, setRecentAlerts] = useState([
-    "[22:03:15] 이상행동 감지 - 흡연",
-    "[11:47:00] 이상행동 감지 - 쓰러짐", 
-    "[10:55:42] 이상행동 감지 - 파손손상",
-    "[02:38:21] 이상행동 감지 - 도난"
+    { text: "[22:03:15] 이상행동 감지 - 흡연", unread: false },
+    { text: "[11:47:00] 이상행동 감지 - 쓰러짐", unread: false },
+    { text: "[10:55:42] 이상행동 감지 - 파손손상", unread: false },
+    { text: "[02:38:21] 이상행동 감지 - 도난", unread: false },
   ]);
   
+  const [hasNewAlert, setHasNewAlert] = useState(false);
+
   // 웹캠 컨트롤러 훅 사용
   const {
     webcamStream,
@@ -52,6 +56,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
   const [eventDetected, setEventDetected] = useState(false);
   const [detectionMessage, setDetectionMessage] = useState('');
   const [threshold, setThreshold] = useState(null);
+
   
   // API 응답 결과를 상태에 반영
   useEffect(() => {
@@ -78,13 +83,17 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
           second: '2-digit' 
         });
         
-        const newAlert = `[${timeString}] 이벤트 감지 - ${lastInferenceResult.queryLabel}`;
+        const newAlert = { 
+          text: `[${timeString}] 이벤트 감지 - ${lastInferenceResult.queryLabel}`,
+           unread: true
+        };
         
         setRecentAlerts(prev => {
           // 중복 방지: 같은 시간대에 같은 이벤트가 감지되면 추가하지 않음
           const isDuplicate = prev.some(alert => 
-            alert.includes(lastInferenceResult.queryLabel) && 
-            Math.abs(new Date(alert.match(/\[(\d{2}:\d{2}:\d{2})\]/)?.[1] || '00:00:00').getTime() - now.getTime()) < 5000
+            alert.text.includes(lastInferenceResult.queryLabel) &&
+            Math.abs(
+              new Date(alert.text.match(/\[(\d{2}:\d{2}:\d{2})\]/)?.[1] || '00:00:00').getTime()- now.getTime()) < 5000
           );
           
           if (!isDuplicate) {
@@ -94,7 +103,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
         });
       }
     }
-  }, [lastInferenceResult]);
+}, [lastInferenceResult]);
 
   // thumbUrl 유효성 검사 함수
   const isThumbUrlValid = (thumbUrl) => {
@@ -135,7 +144,7 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
       <div className="main-content-area">
         <div className="main-content-left">
           {/* <div className="main-store-name">
-            <b>OMNi : for <span className="main-store-name-input">{storeName || "SMIT"} </span></b>
+            <b>OMNi : for <span className="main-store-name-input">{"SMIT"} </span></b>
           </div> */}
           <section className="main-section live-monitoring-section">
             <div className="main-section-header">
@@ -316,9 +325,26 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
           </section>
         </div>
         <aside className="main-content-right">
-          <div className="main-section-header">
+          <div className="main-section-header" style={{ position: "relative" }}>
             <span className="main-section-icon">🔔</span>
             <span className="main-section-title">Recent Alerts</span>
+            {recentAlerts.some(alert => alert.unread) && (
+              <span
+                onClick={() => {
+                  // 빨간 점 클릭 → 모든 알림 읽음 처리
+                  setRecentAlerts(prev => prev.map(a => ({ ...a, unread: false })));
+                }}
+                style={{
+                  display: "inline-block",
+                  width: "10px",
+                  height: "10px",
+                  backgroundColor: "red",
+                  borderRadius: "50%",
+                  marginLeft: "8px",
+                  cursor: "pointer"
+                }}
+              ></span>
+            )}
           </div>
           <div className="main-alert-list">
             {recentAlerts.map((alert, index) => (
@@ -328,10 +354,16 @@ const MainMonitoring = ({ storeName, onPageChange, camType }) => {
                 style={{
                   backgroundColor: index === 0 && eventDetected ? 'rgba(40,167,69,0.1)' : 'transparent',
                   borderLeft: index === 0 && eventDetected ? '3px solid #28a745' : 'none',
-                  fontWeight: index === 0 && eventDetected ? 'bold' : 'normal'
+                  fontWeight: index === 0 && eventDetected ? 'bold' : 'normal',
+                  backgroundColor: alert.unread ? "rgba(255, 132, 132, 0.6)" : "transparent", // 👈 새 알림 하이라이트
+                  borderLeft: alert.unread ? "3px solid red" : "none",
+                  display: "block",
+                  width: "fit-content",
+                  padding: alert.unread ? "2px 4px" : "0",
+                  borderRadius: alert.unread ? "3px" : "0"
                 }}
               >
-                {alert}
+                {alert.text}
               </div>
             ))}
           </div>
