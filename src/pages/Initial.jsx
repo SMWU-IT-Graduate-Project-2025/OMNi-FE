@@ -14,7 +14,7 @@ const Initial = ({ onConnect }) => {
   // Zustand store에서 setSelectedQuery 함수 가져오기
   const { setSelectedQuery } = useQueryStore();
 
-  const fullText = "Welcome to OMNi !";
+  const fullText = "Welcome to OMNi ";
   // 타이핑 애니메이션 효과
   useEffect(() => {
     if (currentIndex < fullText.length) {
@@ -65,7 +65,14 @@ const Initial = ({ onConnect }) => {
       <div className="initial-overlay">
         <div className="initial-form-container">
           <h1 className="initial-title">
-            {displayText}
+            {displayText.split('').map((char, index) => (
+              <span 
+                key={index} 
+                className={index === displayText.length - 1 && currentIndex >= fullText.length ? 'last-char' : ''}
+              >
+                {char}
+              </span>
+            ))}
             <span className="typing-cursor">|</span>
           </h1>
           <input

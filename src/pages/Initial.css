@@ -363,21 +363,42 @@
 
 .initial-title {
   font-size: 2rem;
-  font-weight: 800;
-  color: #7180CB;
+  font-weight: 1000;
+  background: linear-gradient(135deg, #7180CB 0%, #9B59B6 50%, #a897c6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 32px;
   letter-spacing: 2px;
   font-family: "Space Grotesk", "Noto Sans", sans-serif;
 }
 /* 타이핑 커서 애니메이션 */
 .typing-cursor {
-  animation: blink 1s infinite;
-  color: #7180CB;
+  animation: blink 1s ease-out infinite;
+  background: linear-gradient(135deg, #7180CB 0%, #9B59B6 50%, #E74C3C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 @keyframes blink {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
 }
+
+/* 마지막 글자 밑줄 효과 */
+.last-char {
+  position: relative;
+}
+.last-char::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(135deg, #7180CB 0%, #9B59B6 50%, #E74C3C 100%);
+}
+
 
 .initial-inputname {
   width: 100%;
