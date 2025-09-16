@@ -6,6 +6,7 @@ import "./Initial.css";
 const Initial = ({ onConnect }) => {
   const [storeName, setStoreName] = useState("");
   const [eventQuery, setEventQuery] = useState("");
+  const [customEventQuery, setCustomEventQuery] = useState("");
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   
@@ -32,6 +33,7 @@ const Initial = ({ onConnect }) => {
     { value: "Someone is making a V-shape with two fingers", label: "감지할 이벤트를 선택하세요 (e.g. 브이 하기)" },
     { value: "A person is waving his five fingers", label: "카메라에 인사하기" },
     { value: "A person is giving a thumbs-up sign", label: "카메라에 따봉하기" },
+    { value: "custom", label: "기타 (직접 입력)" },
   ];
 
   // 기본 선택값 설정 (첫 로드 시)
@@ -50,6 +52,15 @@ const Initial = ({ onConnect }) => {
       const match = label.match(/\((?:e\.g\.\s*)?(.+?)\)/);
       return match ? match[1].trim() : label;
     };
+
+    // 기타 옵션 선택 시 사용자 입력 텍스트 사용
+    if (eventQuery === "custom" && customEventQuery.trim()) {
+      setSelectedQuery({
+        value: customEventQuery.trim(),
+        label: customEventQuery.trim()
+      });
+      return customEventQuery.trim();
+    }
 
     if (selectedOption) {
       setSelectedQuery({
@@ -93,6 +104,15 @@ const Initial = ({ onConnect }) => {
               </option>
             ))}
           </select>
+          {eventQuery === "custom" && (
+            <input
+              type="text"
+              className="initial-input"
+              placeholder="감지할 이벤트를 직접 입력하세요"
+              value={customEventQuery}
+              onChange={e => setCustomEventQuery(e.target.value)}
+            />
+          )}
           <div className="initial-btn-group">
             <button
               className="initial-connect-btn"
