@@ -128,7 +128,7 @@ const Initial = ({ onConnect }) => {
             >
               connect webcam
             </button>
-            <button
+            {/* <button
               className="initial-connect-btn"
               onClick={() => {
                 const ensuredValue = persistSelectedQuery();
@@ -137,7 +137,7 @@ const Initial = ({ onConnect }) => {
               }}
             >
               mobile cam
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

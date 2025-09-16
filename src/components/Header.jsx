@@ -60,7 +60,9 @@ const Header = ({ onPageChange }) => {
           >
             <b>Event DB</b>
           </span>
-          <span className="header-nav-item"><b>Testbed</b></span>
+          {/* <span className="header-nav-item">
+            <b>Testbed</b>
+            </span> */}
         </nav>
       </div>
     </header>
