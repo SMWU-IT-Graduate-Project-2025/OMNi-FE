@@ -21,8 +21,8 @@ const COLORS = [
 ];
 
 const EventDB = ({ onPageChange }) => {
-  const { storeName } = useContext(StoreContext);
-  const [newEventDescription, setNewEventDescription] = useState("");
+  const { storeName, selectedEvent } = useContext(StoreContext);
+  const [showTooltip, setShowTooltip] = useState(false);
   const [existingEvents] = useState([
     { id: 1, name: "쓰러짐", description: "사람이 쓰러지는 상황 감지" },
     { id: 2, name: "절도", description: "도난 행위 감지" },
@@ -39,39 +39,11 @@ const EventDB = ({ onPageChange }) => {
     { name: "유기", value: 13}
   ]);
 
-  const handleNewEventSubmit = (e) => {
-    e.preventDefault();
-    if (newEventDescription.trim()) {
-      console.log("New event registered:", newEventDescription);
-      setNewEventDescription("");
-    }
-  };
 
   return (
     <div className="event-db-root">
       <Header onPageChange={onPageChange} />
       <div className="event-db-content">
-        {/* New Event Registration Section */}
-        <section className="event-db-section new-event-section">
-          <div className="section-header">
-            <h2 className="section-title">New Event Registration</h2>
-          </div>
-          <form className="new-event-form" onSubmit={handleNewEventSubmit}>
-            <div className="input-group">
-              <input
-                type="text"
-                className="event-description-input"
-                placeholder="Enter the description of the new event..."
-                value={newEventDescription}
-                onChange={(e) => setNewEventDescription(e.target.value)}
-              />
-              <button type="submit" className="submit-button">
-                Enter
-              </button>
-            </div>
-          </form>
-        </section>
-
         {/* Main Content Area */}
         <div className="event-db-main-content">
           {/* Existing Events Section */}
@@ -85,6 +57,24 @@ const EventDB = ({ onPageChange }) => {
                   <span className="event-name">{event.name}</span>
                 </div>
               ))}
+              {selectedEvent && (
+                <div 
+                  className="event-item selected-event tooltip-container"
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                >
+                  <span className="event-name selected-event-name">
+                    선택된 데모 이벤트: {selectedEvent.label}
+                  </span>
+                  {showTooltip && (
+                    <div className="custom-tooltip">
+                      <div className="tooltip-content">
+                        {selectedEvent.value}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </section>
 

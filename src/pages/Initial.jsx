@@ -10,7 +10,7 @@ const Initial = ({ onConnect }) => {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  const { setStoreName: setGlobalStoreName } = useContext(StoreContext);
+  const { setStoreName: setGlobalStoreName, setSelectedEvent } = useContext(StoreContext);
 
   // Zustand store에서 setSelectedQuery 함수 가져오기
   const { setSelectedQuery } = useQueryStore();
@@ -55,18 +55,22 @@ const Initial = ({ onConnect }) => {
 
     // 기타 옵션 선택 시 사용자 입력 텍스트 사용
     if (eventQuery === "custom" && customEventQuery.trim()) {
-      setSelectedQuery({
+      const customEvent = {
         value: customEventQuery.trim(),
         label: customEventQuery.trim()
-      });
+      };
+      setSelectedQuery(customEvent);
+      setSelectedEvent(customEvent);
       return customEventQuery.trim();
     }
 
     if (selectedOption) {
-      setSelectedQuery({
+      const eventData = {
         value: selectedOption.value,
         label: extractExample(selectedOption.label)
-      });
+      };
+      setSelectedQuery(eventData);
+      setSelectedEvent(eventData);
     }
     return selectedOption?.value || "";
   };
