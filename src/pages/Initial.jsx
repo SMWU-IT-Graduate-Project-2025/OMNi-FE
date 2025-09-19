@@ -15,7 +15,7 @@ const Initial = ({ onConnect }) => {
   // Zustand store에서 setSelectedQuery 함수 가져오기
   const { setSelectedQuery } = useQueryStore();
 
-  const fullText = "Welcome to OMNi ";
+  const fullText = "Welcome to OMNi ! ";
   // 타이핑 애니메이션 효과
   useEffect(() => {
     if (currentIndex < fullText.length) {
