@@ -720,10 +720,27 @@ const AlertHistory = ({ onPageChange }) => {
             style={{ backgroundImage: `url(${imageUrl})` }}
           ></div>
 
-          <div className="alert-feedback">
+          <div className="alert-feedback" style={{ 
+            position: 'absolute',
+            bottom: '10px',
+            left: '10px',
+            width: '62%',
+            // maxWidth: '2200px',
+            display: 'flex',
+            justifyContent: 'left',
+            alignItems: 'center',
+            // backgroundColor: 'rgba(255, 255, 255, 0.45)',
+            padding: '8px',
+            borderRadius: '6px',
+            // boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          }}>
           {alert.feedback ? (
-            <span>
-              {alert.feedback === "good" ? "☑️ 정상 탐지 확인됨" : "🚩 오탐 의견 제출되었습니다."}
+            <span style={{ 
+              fontSize: '14px',
+              fontWeight: '600',
+              color: alert.feedback === "good" ? '#59AC77' : '#cf6451'
+            }}>
+              {alert.feedback === "good" ? "☑️ 정상 탐지 확인됨." : "🚩 오탐 의견 제출됨."}
             </span>
           ) : (
             <>
@@ -732,16 +749,37 @@ const AlertHistory = ({ onPageChange }) => {
                   e.stopPropagation();
                   handleFeedback(alert.id, "good");
                 }}
+                style={{
+                  marginRight: '8px',
+                  padding: '6px 12px',
+                  backgroundColor: '#59AC77',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}
               >
-                👍 Good
+                Good
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleFeedback(alert.id, "bad");
                 }}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: '#cf6451',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}
               >
-                👎 Bad
+                Bad
               </button>
             </>
           )}
