@@ -441,19 +441,19 @@
 }
 
 .initial-connect-btn {
-  padding: 14px 0;
-  background: #7180CB;
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-family: "Space Grotesk", "Noto Sans", sans-serif;
+  padding: 14px 0 !important;
+  background: #7180CB !important;
+  color: #fff !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: background 0.2s !important;
+  font-family: "Space Grotesk", "Noto Sans", sans-serif !important;
 }
 .initial-connect-btn:hover {
-  background: #5b61a3;
+  background: #5b61a3 !important;
 }
 
 .initial-btn-group {
@@ -465,11 +465,7 @@
   justify-content: center;
 }
 
-.initial-btn-group .initial-connect-btn:first-child {
-  flex: 1.4;
-}
-.initial-btn-group .initial-connect-btn:last-child {
+.initial-btn-group .initial-connect-btn {
   flex: 1;
-  background: #b2b4bb;
 }
   

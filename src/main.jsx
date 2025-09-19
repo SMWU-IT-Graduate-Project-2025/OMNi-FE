@@ -3,6 +3,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import OMNiApp from './App'
 import './index.css' // Tailwind import 포함
+import './lib/supabase' // 전역 Supabase 클라이언트 초기화
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

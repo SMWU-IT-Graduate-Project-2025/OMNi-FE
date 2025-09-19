@@ -4,6 +4,7 @@ import Initial from "./pages/Initial";
 import MainMonitoring from "./pages/MainMonitoring";
 import AlertHistory from "./pages/AlertHistory";
 import EventDB from "./pages/EventDB";
+import "./lib/supabase"; // 전역 Supabase 클라이언트 초기화
 
 export default function OMNiApp() {
   const [page, setPage] = useState("home");
