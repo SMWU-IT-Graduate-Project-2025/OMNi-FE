@@ -86,6 +86,7 @@ const useWebcamController = (camType) => {
       const parsedResult = {
         success: result.success,
         eventDetected: result.event_detected,
+        eventActive: result.event_active,
         similarityScore: result.similarity_score,
         queryLabel: result.query_label,
         queryText: result.query_text,

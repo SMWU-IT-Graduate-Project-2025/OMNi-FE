@@ -56,25 +56,31 @@ const MainMonitoring = ({ onPageChange, camType }) => {
   const [eventDetected, setEventDetected] = useState(false);
   const [detectionMessage, setDetectionMessage] = useState('');
   const [threshold, setThreshold] = useState(null);
-
+  const [eventActive, setEventActive] = useState(false);
   
   // API 응답 결과를 상태에 반영
   useEffect(() => {
     if (lastInferenceResult) {
+      console.log("🔥 lastInferenceResult:", lastInferenceResult);
+      console.log("➡️ eventDetected:", lastInferenceResult.eventDetected);
+      console.log("➡️ eventActive:", lastInferenceResult.eventActive);
       // similarity_score 파싱
-      const score = lastInferenceResult.similarityScore;
+      const score = lastInferenceResult.similarityScore ?? lastInferenceResult.similarity_score;
+      console.log("➡️ Parsed similarity score:", score);
       if (typeof score === 'number' && isFinite(score)) {
         setLatestScore(score);
       }
       
-      // 이벤트 감지 상태 업데이트
       const wasEventDetected = lastInferenceResult.eventDetected || false;
+      const isActive = lastInferenceResult.eventActive ?? false;
+      setEventActive(isActive);
       setEventDetected(wasEventDetected);
       setDetectionMessage(lastInferenceResult.message || '');
       setThreshold(lastInferenceResult.threshold || null);
       
-      // 이벤트가 감지되면 Recent Alerts에 추가
-      if (wasEventDetected && lastInferenceResult.queryLabel) {
+      
+      // 새 이벤트가 감지되면 Recent Alerts에 추가
+      if (lastInferenceResult.eventDetected && (lastInferenceResult.queryLabel ?? lastInferenceResult.query_label)) {
         const now = new Date();
         const timeString = now.toLocaleTimeString('ko-KR', { 
           hour12: false, 
@@ -84,14 +90,14 @@ const MainMonitoring = ({ onPageChange, camType }) => {
         });
         
         const newAlert = { 
-          text: `[${timeString}] 이벤트 감지 - ${lastInferenceResult.queryLabel}`,
+          text: `[${timeString}] 이벤트 감지 - ${(lastInferenceResult.queryLabel ?? lastInferenceResult.query_label)}`,
            unread: true
         };
         
         setRecentAlerts(prev => {
           // 중복 방지: 같은 시간대에 같은 이벤트가 감지되면 추가하지 않음
           const isDuplicate = prev.some(alert => 
-            alert.text.includes(lastInferenceResult.queryLabel) &&
+            alert.text.includes(lastInferenceResult.queryLabel ?? lastInferenceResult.query_label) &&
             Math.abs(
               new Date(alert.text.match(/\[(\d{2}:\d{2}:\d{2})\]/)?.[1] || '00:00:00').getTime()- now.getTime()) < 5000
           );
@@ -268,7 +274,7 @@ const MainMonitoring = ({ onPageChange, camType }) => {
                     right: 10,
                     background: inferenceError 
                       ? "rgba(220,53,69,0.8)" 
-                      : eventDetected 
+                      : eventActive
                         ? "rgba(40,167,69,0.8)" 
                         : "rgba(0,0,0,0.55)",
                     color: "#fff",
@@ -293,7 +299,8 @@ const MainMonitoring = ({ onPageChange, camType }) => {
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ opacity: 0.9, fontWeight: "bold" }}>
-                          {eventDetected ? "🎯 이벤트 감지됨" : "👁️ 모니터링 중"}
+                          {eventActive 
+                            ? (eventDetected ? "🎯 이벤트 감지됨" : "🟢 이벤트 유지 중"): "👁️ 모니터링 중"}
                         </span>
                         {isCapturing && (
                           <span style={{ fontSize: 12, opacity: 0.8 }}>capturing…</span>
@@ -352,11 +359,17 @@ const MainMonitoring = ({ onPageChange, camType }) => {
                 key={index} 
                 className="main-alert-item"
                 style={{
-                  backgroundColor: index === 0 && eventDetected ? 'rgba(40,167,69,0.1)' : 'transparent',
-                  borderLeft: index === 0 && eventDetected ? '3px solid #28a745' : 'none',
-                  fontWeight: index === 0 && eventDetected ? 'bold' : 'normal',
-                  backgroundColor: alert.unread ? "rgba(255, 132, 132, 0.6)" : "transparent", // 👈 새 알림 하이라이트
-                  borderLeft: alert.unread ? "3px solid red" : "none",
+                  backgroundColor: alert.unread
+                    ? "rgba(255, 132, 132, 0.6)"
+                    : (index === 0 && eventActive)
+                      ? "rgba(40,167,69,0.1)"
+                      : "transparent",
+                  borderLeft: alert.unread
+                    ? "3px solid red"
+                    : (index === 0 && eventActive)
+                      ? "3px solid #28a745"
+                      : "none",
+                  fontWeight: index === 0 && eventActive ? "bold" : "normal",
                   display: "block",
                   width: "fit-content",
                   padding: alert.unread ? "2px 4px" : "0",
