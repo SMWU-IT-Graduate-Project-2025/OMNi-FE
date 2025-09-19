@@ -31,10 +31,27 @@ const Header = ({ onPageChange }) => {
             <div 
               className="header-logo" 
               onClick={() => handlePageClick("home")}
-              style={{ cursor: "pointer" }}
+              style={{ 
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px"
+              }}
             >
-                {/* <img src="public/favicon.ico" alt="OMNi Logo" className="header-logo-img" width={30} height={30}/> */}
-                <span className="header-service-name"> OMNi : for {storeName || "SMIT"}</span>
+                <img 
+                  src="/logo-final-omni_full.png" 
+                  alt="OMNi Logo" 
+                  className="header-logo-img" 
+                  style={{ height: '45px', width: 'auto', paddingLeft: '10px', paddingBottom: '7px' }}
+                />
+                <span style={{ 
+                  fontSize: '26px', 
+                  fontWeight: '1000',
+                  color: '#333',
+                  whiteSpace: 'nowrap'
+                }}>
+                  for {storeName || "SMIT"}
+                </span>
             </div>
           
         </div>
