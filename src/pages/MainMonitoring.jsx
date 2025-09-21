@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useContext } from "react";
 import "./MainMonitoring.css";
-import Header from "../components/Header.jsx";
+import Header from "../components/header.jsx";
 import ClipModal from "../components/ClipModal";
 import useWebcamController from "../components/WebcamController";
 import useQueryStore from "../store/queryStore";
@@ -57,6 +57,9 @@ const MainMonitoring = ({ onPageChange, camType }) => {
   const [detectionMessage, setDetectionMessage] = useState('');
   const [threshold, setThreshold] = useState(null);
   const [eventActive, setEventActive] = useState(false);
+  const [allEvents, setAllEvents] = useState([]); // 모든 이벤트 감지 결과
+  const [demoEvents, setDemoEvents] = useState([]); // demo_event 결과
+  const [storeAbnormalEvents, setStoreAbnormalEvents] = useState([]); // store_abnormal 결과
   
   // API 응답 결과를 상태에 반영
   useEffect(() => {
@@ -64,6 +67,10 @@ const MainMonitoring = ({ onPageChange, camType }) => {
       console.log("🔥 lastInferenceResult:", lastInferenceResult);
       console.log("➡️ eventDetected:", lastInferenceResult.eventDetected);
       console.log("➡️ eventActive:", lastInferenceResult.eventActive);
+      console.log("➡️ demoEvents:", lastInferenceResult.demoEvents);
+      console.log("➡️ storeAbnormalEvents:", lastInferenceResult.storeAbnormalEvents);
+      console.log("➡️ allEvents:", lastInferenceResult.allEvents);
+      
       // similarity_score 파싱
       const score = lastInferenceResult.similarityScore ?? lastInferenceResult.similarity_score;
       console.log("➡️ Parsed similarity score:", score);
@@ -78,9 +85,17 @@ const MainMonitoring = ({ onPageChange, camType }) => {
       setDetectionMessage(lastInferenceResult.message || '');
       setThreshold(lastInferenceResult.threshold || null);
       
+      // 모든 이벤트 정보 업데이트
+      setAllEvents(lastInferenceResult.allEvents || []);
+      setDemoEvents(lastInferenceResult.demoEvents || []);
+      setStoreAbnormalEvents(lastInferenceResult.storeAbnormalEvents || []);
       
-      // 새 이벤트가 감지되면 Recent Alerts에 추가
-      if (lastInferenceResult.eventDetected && (lastInferenceResult.queryLabel ?? lastInferenceResult.query_label)) {
+      // 새 이벤트가 감지되면 Recent Alerts에 추가 (demo_event, store_abnormal 지원)
+      const detectedDemoEvents = lastInferenceResult.demoEvents?.filter(event => event.detected) || [];
+      const detectedAbnormalEvents = lastInferenceResult.storeAbnormalEvents?.filter(event => event.detected) || [];
+      const primaryEventDetected = lastInferenceResult.eventDetected && lastInferenceResult.queryLabel;
+      
+      if (detectedDemoEvents.length > 0 || detectedAbnormalEvents.length > 0 || primaryEventDetected) {
         const now = new Date();
         const timeString = now.toLocaleTimeString('ko-KR', { 
           hour12: false, 
@@ -89,15 +104,35 @@ const MainMonitoring = ({ onPageChange, camType }) => {
           second: '2-digit' 
         });
         
+        // 감지된 이벤트들을 카테고리별로 구성
+        const demoLabels = detectedDemoEvents.map(event => event.event_label).join(', ');
+        const abnormalLabels = detectedAbnormalEvents.map(event => event.event_label).join(', ');
+        
+        let alertText = `[${timeString}] 이벤트 감지`;
+        let alertType = 'normal'; // normal, demo, abnormal, both
+        
+        if (detectedDemoEvents.length > 0 && detectedAbnormalEvents.length > 0) {
+          alertText += ` - 시연용: ${demoLabels} - 이상: ${abnormalLabels}`;
+          alertType = 'both';
+        } else if (detectedDemoEvents.length > 0) {
+          alertText += ` - 시연용: ${demoLabels}`;
+          alertType = 'demo';
+        } else if (detectedAbnormalEvents.length > 0) {
+          alertText += ` - 이상: ${abnormalLabels}`;
+          // alertType = 'abnormal';
+        }
+        
         const newAlert = { 
-          text: `[${timeString}] 이벤트 감지 - ${(lastInferenceResult.queryLabel ?? lastInferenceResult.query_label)}`,
-           unread: true
+          text: alertText,
+          unread: true,
+          type: alertType
         };
         
         setRecentAlerts(prev => {
           // 중복 방지: 같은 시간대에 같은 이벤트가 감지되면 추가하지 않음
+          const allDetectedLabels = [...detectedDemoEvents, ...detectedAbnormalEvents].map(event => event.event_label).join(', ');
           const isDuplicate = prev.some(alert => 
-            alert.text.includes(lastInferenceResult.queryLabel ?? lastInferenceResult.query_label) &&
+            alert.text.includes(allDetectedLabels) &&
             Math.abs(
               new Date(alert.text.match(/\[(\d{2}:\d{2}:\d{2})\]/)?.[1] || '00:00:00').getTime()- now.getTime()) < 5000
           );
@@ -221,6 +256,19 @@ const MainMonitoring = ({ onPageChange, camType }) => {
                 <strong>⚠️ 경고:</strong> 감지할 이벤트가 선택되지 않았습니다. 초기 페이지에서 이벤트를 선택해주세요.
               </div>
             )}
+            {inferenceError && (
+              <div className="main-query-info" style={{
+                padding: "8px 16px",
+                margin: "8px 0",
+                backgroundColor: "#f8d7da",
+                borderRadius: "6px",
+                border: "1px solid #f5c6cb",
+                fontSize: "14px",
+                color: "#721c24"
+              }}>
+                <strong>🚨 백엔드 연결 오류:</strong> {inferenceError}
+              </div>
+            )}
             <div className="main-live-video" style={{ position: "relative" }}>
               {/* 숨겨진 캔버스 요소 - 이미지 캡처용 */}
               <canvas
@@ -324,6 +372,45 @@ const MainMonitoring = ({ onPageChange, camType }) => {
                           {detectionMessage}
                         </div>
                       )}
+                      
+                      {/* 멀티클래스 이벤트 감지 결과 표시 */}
+                      {(demoEvents.length > 0 || storeAbnormalEvents.length > 0) && (
+                        <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>
+                          {/* Demo Events 표시 */}
+                          {demoEvents.filter(event => event.detected).length > 0 && (
+                            <div style={{ marginBottom: 4 }}>
+                              <div style={{ fontWeight: "bold", marginBottom: 2, color: "#4CAF50" }}>데모 이벤트:</div>
+                              {demoEvents
+                                .filter(event => event.detected)
+                                .map((event, index) => (
+                                  <div key={`demo-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                                    <span>{event.event_label}:</span>
+                                    <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                                      {event.similarity_score?.toFixed(3) || '0.000'}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                          
+                          {/* Store Abnormal Events 표시 */}
+                          {storeAbnormalEvents.filter(event => event.detected).length > 0 && (
+                            <div>
+                              <div style={{ fontWeight: "bold", marginBottom: 2, color: "#FF9800" }}>매장 이상행동:</div>
+                              {storeAbnormalEvents
+                                .filter(event => event.detected)
+                                .map((event, index) => (
+                                  <div key={`abnormal-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                                    <span>{event.event_label}:</span>
+                                    <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                                      {event.similarity_score?.toFixed(3) || '0.000'}
+                                    </span>
+                                  </div>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -354,31 +441,52 @@ const MainMonitoring = ({ onPageChange, camType }) => {
             )}
           </div>
           <div className="main-alert-list">
-            {recentAlerts.map((alert, index) => (
-              <div 
-                key={index} 
-                className="main-alert-item"
-                style={{
-                  backgroundColor: alert.unread
-                    ? "rgba(255, 132, 132, 0.6)"
-                    : (index === 0 && eventActive)
-                      ? "rgba(40,167,69,0.1)"
-                      : "transparent",
-                  borderLeft: alert.unread
-                    ? "3px solid red"
-                    : (index === 0 && eventActive)
-                      ? "3px solid #28a745"
-                      : "none",
-                  fontWeight: index === 0 && eventActive ? "bold" : "normal",
-                  display: "block",
-                  width: "fit-content",
-                  padding: alert.unread ? "2px 4px" : "0",
-                  borderRadius: alert.unread ? "3px" : "0"
-                }}
-              >
-                {alert.text}
-              </div>
-            ))}
+            {recentAlerts.map((alert, index) => {
+              // 알림 타입에 따른 스타일 결정
+              let backgroundColor = "transparent";
+              let borderLeft = "none";
+              let fontWeight = "normal";
+              
+              if (alert.unread) {
+                // 읽지 않은 알림의 경우 타입에 따라 색상 구분
+                if (alert.type === 'demo') {
+                  backgroundColor = "rgba(156, 39, 176, 0.3)"; // 보라색
+                  borderLeft = "3px solid #9C27B0";
+                } else if (alert.type === 'abnormal') {
+                  backgroundColor = "rgba(244, 67, 54, 0.3)"; // 빨간색
+                  borderLeft = "3px solid #F44336";
+                } else if (alert.type === 'both') {
+                  backgroundColor = "rgba(255, 152, 0, 0.3)"; // 주황색 (혼합)
+                  borderLeft = "3px solid #FF9800";
+                } else {
+                  backgroundColor = "rgba(255, 132, 132, 0.6)"; // 기본 빨간색
+                  borderLeft = "3px solid red";
+                }
+                fontWeight = "bold";
+              } else if (index === 0 && eventActive) {
+                backgroundColor = "rgba(40,167,69,0.1)";
+                borderLeft = "3px solid #28a745";
+                fontWeight = "bold";
+              }
+              
+              return (
+                <div 
+                  key={index} 
+                  className="main-alert-item"
+                  style={{
+                    backgroundColor: backgroundColor,
+                    borderLeft: borderLeft,
+                    fontWeight: fontWeight,
+                    display: "block",
+                    width: "fit-content",
+                    padding: alert.unread ? "2px 4px" : "0",
+                    borderRadius: alert.unread ? "3px" : "0"
+                  }}
+                >
+                  {alert.text}
+                </div>
+              );
+            })}
           </div>
         </aside>
       </div>

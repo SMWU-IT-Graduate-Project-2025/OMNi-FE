@@ -82,16 +82,29 @@ const useWebcamController = (camType) => {
       const result = await response.json();
       console.log('API 응답:', result);
       
-      // 백엔드 응답 형식에 맞게 파싱
+      // 백엔드 응답 형식에 맞게 파싱 (새로운 demo_event, store_abnormal 구조)
+      const demoEvents = result.demo_event || [];
+      const storeAbnormalEvents = result.store_abnormal || [];
+      
+      // demo_event에서 첫 번째 이벤트를 primary event로 사용
+      const primaryDemoEvent = demoEvents[0] || {};
+      
+      // 모든 이벤트를 하나의 배열로 합치기
+      const allEvents = [...demoEvents, ...storeAbnormalEvents];
+      
       const parsedResult = {
         success: result.success,
-        eventDetected: result.event_detected,
-        eventActive: result.event_active,
-        similarityScore: result.similarity_score,
-        queryLabel: result.query_label,
-        queryText: result.query_text,
-        message: result.message,
-        threshold: result.threshold
+        // demo_event에서 사용자 선택 이벤트 정보 추출
+        eventDetected: primaryDemoEvent.detected || false,
+        eventActive: primaryDemoEvent.active || false,
+        similarityScore: primaryDemoEvent.similarity_score || 0,
+        queryLabel: primaryDemoEvent.event_label || '',
+        // demo_event와 store_abnormal 이벤트 정보
+        demoEvents: demoEvents,
+        storeAbnormalEvents: storeAbnormalEvents,
+        allEvents: allEvents,
+        message: result.message || '',
+        threshold: result.threshold || 0
       };
       
       console.log('파싱된 결과:', parsedResult);
