@@ -127,7 +127,7 @@ const AlertHistory = ({ onPageChange }) => {
             name_ko,
             description
           ),
-          cameras (id, type, enabled),
+          cameras (id, enabled),
           alert_media (
             id,
             thumbnail_url,
@@ -711,7 +711,15 @@ const AlertHistory = ({ onPageChange }) => {
           <div className="alert-text-section">
             <p className="alert-description">{alert.description}</p>
             {/* <p className="alert-time">{alert.date} | {alert.time}</p> */}
-            <p className="alert-type">{alert.type}</p>
+            <p 
+              className="alert-type"
+              style={{
+                textDecoration: alert.feedback === "bad" ? "line-through" : "none",
+                opacity: alert.feedback === "bad" ? 0.6 : 1
+              }}
+            >
+              {alert.type}
+            </p>
             
             <p className="alert-date">{alert.date} | {alert.time}</p>
           </div>

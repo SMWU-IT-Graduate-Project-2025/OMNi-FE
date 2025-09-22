@@ -2,30 +2,7 @@
 
 ## 기술 스택
 
-- React 18
-- JavaScript
-- Vite
-- CSS3 
-
-## 주요 기능
-
-#### **✋ INITIAL PAGE**
-- 매장 이름 등록
-- 매장별 감지할 이벤트 설명문 입력
-- 카메라 연결 및 모니터링 진입 버튼
-
-#### **🫵 MAIN PAGE**
-- 온라인 영상 스트림 (Monitoring target)
-- 감지된 이벤트에 대한 알람
-- 최근 감지된 이벤트 구간 미리보기
-
-#### **👉 Alert History**
-- 감지된 이벤트 구간 로그
-- 감지된 이벤트 구간 평가 (Feedback for continuous learning)
-
-#### **✋ Event History**
-- 새로 감지할 이벤트 등록
-- 발생한 이벤트 분석 대시보드
+> React 18, JavaScript, Vite, CSS3 
 
 
 ## 설치 및 실행
@@ -59,3 +36,25 @@ src/
 ├── main.tsx         # 애플리케이션 진입점
 └── index.css        # 전역 스타일
 ```
+
+
+
+## 주요 기능
+
+#### **✋ INITIAL PAGE**
+- 매장 이름 등록
+- 매장별 감지할 이벤트 설명문 입력
+- 카메라 연결 및 모니터링 진입 버튼
+
+#### **🫵 MAIN PAGE**
+- 온라인 영상 스트림 (Monitoring target)
+- 감지된 이벤트에 대한 알람
+- 최근 감지된 이벤트 구간 미리보기
+
+#### **👉 Alert History**
+- 감지된 이벤트 구간 로그
+- 감지된 이벤트 구간 평가 (Feedback for continuous learning)
+
+#### **✋ Event History**
+- 타겟 이벤트 목록
+- 발생한 이벤트 분석 대시보드

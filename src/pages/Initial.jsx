@@ -31,8 +31,8 @@ const Initial = ({ onConnect }) => {
   // 선택 가능한 이벤트 쿼리 옵션 정의
   const eventQueryOptions = [
     { value: "Someone is making a V-shape with two fingers", label: "감지할 이벤트를 선택하세요 (e.g. 브이 하기)" },
-    { value: "A person is waving his five fingers", label: "카메라에 인사하기" },
     { value: "A person is giving a thumbs-up sign", label: "카메라에 따봉하기" },
+    { value: "A person is waving his five fingers, streching five fingers wide", label: "카메라에 인사하기" },
     { value: "custom", label: "기타 (직접 입력)" },
   ];
 
