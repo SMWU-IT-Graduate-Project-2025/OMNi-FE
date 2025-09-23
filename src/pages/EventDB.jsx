@@ -13,7 +13,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import "./EventDB.css";
-import Header from "../components/Header.jsx";
+import Header from "../components/header.jsx";
 import { StoreContext } from "../StoreContext";
 import supabase from "../lib/supabase";
 
@@ -24,18 +24,22 @@ const COLORS = [
   "#8fbb8f",
   "#6ab8a0",
   "#4a90a0",
+  "#725CAD",
+  "#96A78D",
+  "#F6DC43"
 ];
 
 const EventDB = ({ onPageChange }) => {
   const { storeName, selectedEvent } = useContext(StoreContext);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [hoveredEvent, setHoveredEvent] = useState(null); // 호버된 이벤트 상태 추가
   const [existingEvents] = useState([
     { id: 1, name: "쓰러짐", description: "사람이 쓰러지는 상황 감지" },
-    { id: 2, name: "절도", description: "도난 행위 감지" },
-    { id: 3, name: "흡연", description: "폭력 행위 감지" },
+    { id: 2, name: "절도도난", description: "상품 도난 행위 감지" },
+    { id: 3, name: "실내흡연", description: "매장내 흡연 감지" },
     { id: 4, name: "방화", description: "무단 침입 감지" },
-    { id: 5, name: "유기", description: "화재 상황 감지" },
-    { id: 6, name: "파손", description: "교통사고 감지" }
+    { id: 5, name: "유기방치", description: "물품 유기 감지" },
+    { id: 6, name: "파손손상", description: "장비 파손/파괴 감지" }
   ]);
 
   const [eventStatistics, setEventStatistics] = useState([]);
@@ -320,7 +324,19 @@ const EventDB = ({ onPageChange }) => {
               </div>
               <div className="existing-events-list">
                 {existingEvents.map((event) => (
-                  <div key={event.id} className="event-item">
+                  <div 
+                    key={event.id} 
+                    className="event-item"
+                    onMouseEnter={() => setHoveredEvent(event.name)}
+                    onMouseLeave={() => setHoveredEvent(null)}
+                    style={{
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      transform: hoveredEvent === event.name ? 'scale(1.05)' : 'scale(1)',
+                      backgroundColor: hoveredEvent === event.name ? '#f0f2ff' : 'transparent',
+                      color: hoveredEvent === event.name ? '#7180CB' : '#666'
+                    }}
+                  >
                     <span className="event-name">{event.name}</span>
                   </div>
                 ))}
@@ -386,13 +402,34 @@ const EventDB = ({ onPageChange }) => {
                         strokeWidth={2}
                         animationDuration={1000}
                         animationBegin={0}
+                        activeIndex={eventStatistics.findIndex(entry => hoveredEvent === entry.name)}
+                        activeShape={{
+                          outerRadius: 140,
+                          stroke: "#ffffff",
+                          strokeWidth: 3
+                        }}
                       >
-                        {eventStatistics.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
+                        {eventStatistics.map((entry, index) => {
+                          const isHovered = hoveredEvent === entry.name;
+                          const isNotHovered = hoveredEvent && hoveredEvent !== entry.name;
+                          
+                          return (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={
+                                isHovered 
+                                  ? COLORS[index % COLORS.length] // 호버된 이벤트는 원래 색상
+                                  : isNotHovered 
+                                    ? "#e0e0e0" // 호버되지 않은 이벤트는 회색
+                                    : COLORS[index % COLORS.length] // 호버가 없을 때는 원래 색상
+                              }
+                              style={{
+                                filter: isHovered ? 'brightness(1.2)' : isNotHovered ? 'brightness(0.7)' : 'brightness(1)',
+                                transition: 'all 0.3s ease'
+                              }}
+                            />
+                          );
+                        })}
                       </Pie>
                       <Tooltip 
                         formatter={(value, name) => [`${value}회`, name]}
@@ -412,6 +449,24 @@ const EventDB = ({ onPageChange }) => {
                           fontSize: "14px",
                           fontFamily: '"Space Grotesk", "Noto Sans", sans-serif'
                         }}
+                        payload={eventStatistics.map((entry, index) => {
+                          const isHovered = hoveredEvent === entry.name;
+                          const isNotHovered = hoveredEvent && hoveredEvent !== entry.name;
+                          
+                          return {
+                            value: entry.name,
+                            type: "circle",
+                            color: isHovered 
+                              ? COLORS[index % COLORS.length]
+                              : isNotHovered 
+                                ? "#e0e0e0"
+                                : COLORS[index % COLORS.length],
+                            style: {
+                              opacity: isNotHovered ? 0.5 : 1,
+                              transition: 'all 0.3s ease'
+                            }
+                          };
+                        })}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -426,7 +481,7 @@ const EventDB = ({ onPageChange }) => {
             <section className="event-db-section feedback-section">
               <div className="section-header">
                 <h2 className="section-title">Model Feedback</h2>
-                <p className="section-subtitle">Analyze model performance by event type</p>
+                <p className="section-subtitle">Evaluate and analyze model performance by user feedback</p>
               </div>
               <div className="feedback-content">
                 {feedbackLoading ? (

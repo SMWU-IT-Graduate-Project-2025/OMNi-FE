@@ -691,10 +691,13 @@ const AlertHistory = ({ onPageChange }) => {
     const isHovered = hoveredAlertId === alert.id;
     const isAnyHovered = hoveredAlertId !== null;
     
+    // 이미지가 없는 경우를 확인 (alert_media에 이미지 소스가 없는 경우)
+    const hasNoImage = !alert.thumbUrl;
+    
     return (
       <div key={alert.id} className="alert-item-container">
         <div
-          className="alert-item-content"
+          className={`alert-item-content ${hasNoImage ? 'no-image' : ''}`}
           onClick={() => handleAlertClick(alert)}
           onMouseEnter={() => setHoveredAlertId(alert.id)}
           onMouseLeave={() => setHoveredAlertId(null)}
@@ -723,10 +726,12 @@ const AlertHistory = ({ onPageChange }) => {
             
             <p className="alert-date">{alert.date} | {alert.time}</p>
           </div>
-          <div
-            className="alert-image"
-            style={{ backgroundImage: `url(${imageUrl})` }}
-          ></div>
+          {!hasNoImage && (
+            <div
+              className="alert-image"
+              style={{ backgroundImage: `url(${imageUrl})` }}
+            ></div>
+          )}
 
           <div className="alert-feedback" style={{ 
             position: 'absolute',
