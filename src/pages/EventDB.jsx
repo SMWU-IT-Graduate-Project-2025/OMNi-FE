@@ -13,7 +13,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import "./EventDB.css";
-import Header from "../components/header.jsx";
+import Header from "../components/Header.jsx";
 import { StoreContext } from "../StoreContext";
 import supabase from "../lib/supabase";
 

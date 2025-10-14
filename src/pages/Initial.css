@@ -333,7 +333,7 @@
 .initial-bg {
   min-height: 100vh;
   width: 100vw;
-  background: #fff url('../public/BG-CCTV-purple.png') no-repeat left top;
+  background: #fff url('/BG-CCTV-purple.png') no-repeat left top;
   background-size: cover;
   display: flex;
   align-items: center;
